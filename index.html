@@ -72,4 +72,89 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth =
+    const auth = getAuth(app);
+
+    // LOGIN FUNCTION
+    window.login = function() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        signInWithEmailAndPassword(auth, e, p)
+            .then(() => {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadExistingData();
+            })
+            .catch(error => alert("Login Failed: " + error.message));
+    };
+
+    // GENERATE ALARMS (WITH MEMORY FIX)
+    window.generateAlarms = function(type) {
+        const container = document.getElementById(`${type}Alarms`);
+        const count = document.getElementById(`${type}Count`).value;
+
+        // Save existing values before clearing
+        const tempValues = [];
+        container.querySelectorAll('input').forEach(inp => tempValues.push(inp.value));
+
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            const val = tempValues[i] || ""; 
+            container.innerHTML += `
+                <div class="alarm-row">
+                    <span>Alarm ${i + 1}:</span>
+                    <input type="time" value="${val}">
+                </div>`;
+        }
+    };
+
+    // SAVE TO FIREBASE (WITH STATUS BUTTON)
+    window.saveToFirebase = async function() {
+        const btn = document.getElementById('pushBtn');
+        btn.innerText = "Syncing... ⏳";
+        btn.style.background = "#f39c12";
+
+        const data = {
+            regularCount: document.getElementById('regularCount').value,
+            regularTimes: Array.from(document.querySelectorAll('#regularAlarms input')).map(i => i.value),
+            examCount: document.getElementById('examCount').value,
+            examTimes: Array.from(document.querySelectorAll('#examAlarms input')).map(i => i.value)
+        };
+
+        try {
+            await set(ref(db, 'siren/schedule'), data);
+            btn.innerText = "Saved to Siren! ✅";
+            btn.style.background = "#27ae60";
+            setTimeout(() => {
+                btn.innerText = "Push to Siren";
+                btn.style.background = "";
+            }, 3000);
+        } catch (e) {
+            btn.innerText = "Error! ❌";
+            btn.style.background = "#e74c3c";
+        }
+    };
+
+    // LOAD DATA ON START
+    async function loadExistingData() {
+        const snapshot = await get(ref(db, 'siren/schedule'));
+        if (snapshot.exists()) {
+            const d = snapshot.val();
+            document.getElementById('regularCount').value = d.regularCount || 0;
+            document.getElementById('examCount').value = d.examCount || 0;
+            
+            // Build the rows first
+            generateAlarms('regular');
+            generateAlarms('exam');
+
+            // Then fill them with the times
+            const rInputs = document.querySelectorAll('#regularAlarms input');
+            if(d.regularTimes) d.regularTimes.forEach((t, i) => { if(rInputs[i]) rInputs[i].value = t; });
+            
+            const eInputs = document.querySelectorAll('#examAlarms input');
+            if(d.examTimes) d.examTimes.forEach((t, i) => { if(eInputs[i]) eInputs[i].value = t; });
+        }
+    }
+</script>
+
+</body>
+</html>
