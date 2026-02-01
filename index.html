@@ -18,21 +18,26 @@
 <div id="authView" class="max-w-md mx-auto mt-16 p-8 bg-white rounded-2xl shadow-xl border border-gray-100">
     <div class="text-center mb-8">
         <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-shield-alt text-blue-600 text-2xl"></i>
+            <i class="fas fa-user-shield text-blue-600 text-2xl"></i>
         </div>
         <h2 class="text-2xl font-bold text-gray-800" id="authTitle">Admin Login</h2>
     </div>
 
     <div class="space-y-4">
         <input type="email" id="email" placeholder="Email" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-        <input type="password" id="password" placeholder="Password" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="relative">
+            <input type="password" id="password" placeholder="Password" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="togglePassVisibility('password')" class="absolute right-3 top-3 text-gray-400">
+                <i class="fas fa-eye" id="eye-icon"></i>
+            </button>
+        </div>
         
-        <div class="flex items-center justify-between text-sm">
-            <label class="flex items-center text-gray-600 cursor-pointer"><input type="checkbox" id="rememberMe" class="mr-2"> Remember Me</label>
+        <div class="flex items-center justify-between text-sm text-gray-600">
+            <label class="flex items-center cursor-pointer"><input type="checkbox" id="rememberMe" class="mr-2"> Remember Me</label>
             <button onclick="forgotPassword()" class="text-blue-600 hover:underline">Forgot Password?</button>
         </div>
 
-        <button onclick="handleAuth()" id="authBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-bold shadow-lg transition">Login</button>
+        <button onclick="handleAuth()" id="authBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg font-bold shadow-lg transition">Login</button>
         <p class="text-center text-sm text-gray-600 mt-4">
             <span id="toggleText">Need a new account?</span> 
             <button onclick="toggleAuthMode()" id="toggleBtn" class="text-blue-600 font-bold ml-1">Sign Up</button>
@@ -41,21 +46,31 @@
 </div>
 
 <div id="mainView" class="hidden max-w-2xl mx-auto p-4 mb-10">
-    <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer" onclick="toggleProfile()">
-                <i class="fas fa-user text-sm"></i>
-            </div>
+            <button onclick="toggleProfile()" class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition relative">
+                <i class="fas fa-user-cog"></i>
+            </button>
             <div>
-                <p class="text-xs text-gray-500">System Admin</p>
-                <p class="font-bold text-gray-800 text-sm" id="userDisplay text-truncate">User</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Admin</p>
+                <p class="font-bold text-gray-800 text-sm truncate w-32 md:w-48" id="userDisplay">Loading...</p>
             </div>
         </div>
-        <button onclick="logout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-100">LOGOUT</button>
+        <button onclick="logout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-100 transition">LOGOUT</button>
     </div>
 
-    <div id="profileSection" class="hidden bg-white p-6 rounded-xl mb-6 shadow-inner border-l-4 border-blue-500">
-        <button onclick="changePassword()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm">Change Password</button>
+    <div id="profileSection" class="hidden bg-white p-6 rounded-xl mb-6 shadow-inner border-2 border-blue-50 animate-fadeIn">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-gray-800"><i class="fas fa-key mr-2 text-blue-600"></i>Security Settings</h3>
+            <button onclick="toggleProfile()" class="text-gray-400"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-xs text-blue-700 mb-3">To update your password, enter a new one below. It must be at least 6 characters.</p>
+            <div class="flex gap-2">
+                <input type="password" id="newPassword" placeholder="New Password" class="flex-1 p-2 border rounded-md text-sm outline-none focus:ring-2 focus:ring-blue-400">
+                <button onclick="changePassword()" class="bg-blue-600 text-white px-4 py-2 rounded-md text-xs font-bold hover:bg-blue-700 transition">Update</button>
+            </div>
+        </div>
     </div>
 
     <div class="flex bg-white rounded-t-2xl shadow-sm border-b overflow-hidden">
@@ -64,27 +79,22 @@
         <button onclick="switchMode('special')" id="tab-special" class="flex-1 py-4 font-bold text-gray-400">SPECIAL</button>
     </div>
 
-    <div class="bg-white p-6 rounded-b-2xl shadow-xl border-t-0 border border-gray-100">
+    <div class="bg-white p-6 rounded-b-2xl shadow-xl border border-t-0 border-gray-100">
         <div class="mb-6">
-            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Configure Total Alarms</label>
-            <select id="alarmCount" onchange="updateAlarmInputs()" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Number of Alarms</label>
+            <select id="alarmCount" onchange="updateAlarmInputs()" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold">
                 <script>for(let i=0; i<=20; i++) document.write(`<option value="${i}">${i}</option>`);</script>
             </select>
-        </div>
-
-        <div class="flex text-[10px] font-bold text-gray-400 uppercase mb-2 px-3">
-            <div class="flex-1">Alarm Time</div>
-            <div class="flex-1">Siren Duration</div>
         </div>
 
         <div id="alarmList" class="space-y-3 max-h-[400px] overflow-y-auto mb-8 pr-2 custom-scrollbar">
             </div>
 
-        <div class="flex flex-col gap-3">
-            <button onclick="saveData(false)" id="saveBtn" class="w-full bg-gray-800 hover:bg-black text-white p-4 rounded-xl font-bold flex items-center justify-center gap-3 transition">
-                <i class="fas fa-hdd"></i> SAVE DRAFT
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button onclick="saveData(false)" id="saveBtn" class="bg-gray-800 hover:bg-black text-white p-4 rounded-xl font-bold flex items-center justify-center gap-3 transition">
+                <i class="fas fa-save"></i> SAVE DRAFT
             </button>
-            <button onclick="saveData(true)" id="pushBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold shadow-lg flex items-center justify-center gap-3 transition">
+            <button onclick="saveData(true)" id="pushBtn" class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold shadow-lg shadow-blue-200 flex items-center justify-center gap-3 transition">
                 <i class="fas fa-broadcast-tower"></i> PUSH TO SIREN
             </button>
         </div>
@@ -113,6 +123,7 @@
     let currentMode = 'regular';
     let isSignUp = false;
 
+    // --- AUTH OBSERVER ---
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('authView').classList.add('hidden');
@@ -138,102 +149,130 @@
     window.toggleAuthMode = () => {
         isSignUp = !isSignUp;
         document.getElementById('authTitle').innerText = isSignUp ? "Create Admin" : "Admin Login";
-        document.getElementById('authBtn').innerText = isSignUp ? "Register" : "Login";
+        document.getElementById('authBtn').innerText = isSignUp ? "Sign Up" : "Login";
+    };
+
+    window.togglePassVisibility = (id) => {
+        const el = document.getElementById(id);
+        const icon = document.getElementById('eye-icon');
+        el.type = el.type === 'password' ? 'text' : 'password';
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    };
+
+    // --- PROFILE FEATURES ---
+    window.toggleProfile = () => document.getElementById('profileSection').classList.toggle('hidden');
+
+    window.changePassword = async () => {
+        const newPass = document.getElementById('newPassword').value;
+        if (!newPass || newPass.length < 6) {
+            alert("Password must be at least 6 characters.");
+            return;
+        }
+        try {
+            await updatePassword(auth.currentUser, newPass);
+            alert("Password successfully updated! Please log in again.");
+            document.getElementById('newPassword').value = '';
+            logout();
+        } catch (e) {
+            alert("Security Error: To change password, you must have logged in recently. Please log out and log back in, then try again.");
+        }
+    };
+
+    // --- DASHBOARD LOGIC ---
+    window.switchMode = (mode) => {
+        currentMode = mode;
+        ['regular', 'exam', 'special'].forEach(m => {
+            const tab = document.getElementById(`tab-${m}`);
+            tab.classList.toggle('active-tab', m === mode);
+            tab.classList.toggle('text-gray-400', m !== mode);
+            tab.classList.toggle('text-blue-600', m === mode);
+        });
+        loadModeData();
     };
 
     window.updateAlarmInputs = () => {
         const container = document.getElementById('alarmList');
         const count = document.getElementById('alarmCount').value;
-        
-        // Capture existing data to prevent erasing on count change
         const currentData = Array.from(container.querySelectorAll('.alarm-row')).map(row => ({
-            time: row.querySelector('input[type="time"]').value,
-            duration: row.querySelector('select').value
+            t: row.querySelector('input[type="time"]').value,
+            d: row.querySelector('select').value
         }));
 
         container.innerHTML = '';
         for(let i=0; i<count; i++) {
-            const saved = currentData[i] || { time: '', duration: 'medium' };
+            const saved = currentData[i] || { t: '', d: '7' };
             container.innerHTML += `
-                <div class="alarm-row flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
-                    <input type="time" value="${saved.time}" class="flex-1 bg-white p-2 rounded-lg border outline-none text-sm">
-                    <select class="flex-1 bg-white p-2 rounded-lg border outline-none text-sm">
-                        <option value="3" ${saved.duration == '3' ? 'selected' : ''}>Short (3s)</option>
-                        <option value="7" ${saved.duration == '7' ? 'selected' : ''}>Medium (7s)</option>
-                        <option value="15" ${saved.duration == '15' ? 'selected' : ''}>Long (15s)</option>
+                <div class="alarm-row flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm animate-fadeIn">
+                    <div class="text-[10px] font-bold text-gray-400 w-10">#${i+1}</div>
+                    <input type="time" value="${saved.t}" class="flex-1 bg-white p-2 rounded-lg border outline-none text-sm">
+                    <select class="flex-1 bg-white p-2 rounded-lg border outline-none text-sm font-medium">
+                        <option value="3" ${saved.d == '3' ? 'selected' : ''}>Short (3s)</option>
+                        <option value="7" ${saved.d == '7' ? 'selected' : ''}>Medium (7s)</option>
+                        <option value="15" ${saved.d == '15' ? 'selected' : ''}>Long (15s)</option>
                     </select>
                 </div>`;
         }
     };
 
-    window.saveData = async (isPush) => {
-        const rows = Array.from(document.querySelectorAll('.alarm-row'));
-        const alarmSettings = rows.map(row => ({
-            t: row.querySelector('input[type="time"]').value,
-            d: row.querySelector('select').value
-        }));
-
-        const btn = isPush ? document.getElementById('pushBtn') : document.getElementById('saveBtn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-
-        try {
-            const updates = {};
-            updates[`siren_system/modes/${currentMode}/alarms`] = alarmSettings;
-            updates[`siren_system/modes/${currentMode}/count`] = alarmSettings.length;
-            
-            if(isPush) {
-                updates[`siren_system/active_config/trigger`] = Date.now();
-                updates[`siren_system/active_config/mode`] = currentMode;
-            }
-
-            await update(ref(db), updates);
-            btn.innerHTML = 'Success! ✅';
-            setTimeout(() => btn.innerHTML = originalText, 2000);
-        } catch (e) { alert(e.message); btn.innerHTML = originalText; }
-    };
-
     async function loadModeData() {
+        document.getElementById('alarmList').innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-blue-600"></i></div>';
         const snap = await get(ref(db, `siren_system/modes/${currentMode}`));
         const container = document.getElementById('alarmList');
+        
         if (snap.exists()) {
             const data = snap.val();
             document.getElementById('alarmCount').value = data.count || 0;
             container.innerHTML = '';
             if(data.alarms) {
-                data.alarms.forEach(alarm => {
+                data.alarms.forEach((alarm, i) => {
                     container.innerHTML += `
                         <div class="alarm-row flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                            <div class="text-[10px] font-bold text-gray-400 w-10">#${i+1}</div>
                             <input type="time" value="${alarm.t}" class="flex-1 bg-white p-2 rounded-lg border outline-none text-sm">
-                            <select class="flex-1 bg-white p-2 rounded-lg border outline-none text-sm">
+                            <select class="flex-1 bg-white p-2 rounded-lg border outline-none text-sm font-medium">
                                 <option value="3" ${alarm.d == '3' ? 'selected' : ''}>Short (3s)</option>
                                 <option value="7" ${alarm.d == '7' ? 'selected' : ''}>Medium (7s)</option>
                                 <option value="15" ${alarm.d == '15' ? 'selected' : ''}>Long (15s)</option>
                             </select>
                         </div>`;
                 });
-            }
+            } else if(data.count > 0) { updateAlarmInputs(); }
+        } else {
+            document.getElementById('alarmCount').value = 0;
+            container.innerHTML = '<p class="text-center text-gray-400 py-10">No alarms set.</p>';
         }
     }
 
-    window.switchMode = (mode) => {
-        currentMode = mode;
-        ['regular', 'exam', 'special'].forEach(m => {
-            document.getElementById(`tab-${m}`).classList.toggle('active-tab', m === mode);
-            document.getElementById(`tab-${m}`).classList.toggle('text-gray-400', m !== mode);
-        });
-        loadModeData();
+    window.saveData = async (isPush) => {
+        const rows = Array.from(document.querySelectorAll('.alarm-row'));
+        const alarmSettings = rows.map(row => ({
+            t: row.querySelector('input[type="time"]').value,
+            d: row.querySelector('select').value
+        })).filter(a => a.t !== "");
+
+        const btn = isPush ? document.getElementById('pushBtn') : document.getElementById('saveBtn');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        try {
+            const updates = {};
+            updates[`siren_system/modes/${currentMode}/alarms`] = alarmSettings;
+            updates[`siren_system/modes/${currentMode}/count`] = alarmSettings.length;
+            if(isPush) {
+                updates[`siren_system/active_config/trigger`] = Date.now();
+                updates[`siren_system/active_config/mode`] = currentMode;
+            }
+            await update(ref(db), updates);
+            btn.innerHTML = 'Success! ✅';
+            setTimeout(() => btn.innerHTML = original, 2000);
+        } catch (e) { alert(e.message); btn.innerHTML = original; }
     };
 
     window.logout = () => signOut(auth);
-    window.toggleProfile = () => document.getElementById('profileSection').classList.toggle('hidden');
     window.forgotPassword = () => {
         const email = document.getElementById('email').value;
         if(email) sendPasswordResetEmail(auth, email).then(() => alert("Reset email sent!"));
-    };
-    window.changePassword = () => {
-        const p = prompt("New password:");
-        if(p) updatePassword(auth.currentUser, p).then(() => alert("Password updated!"));
     };
 </script>
 </body>
