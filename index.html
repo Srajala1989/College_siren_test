@@ -210,6 +210,20 @@
         loadModeData();
     };
 
+    // Helper to generate a row
+    const createAlarmRow = (time = '', duration = '7', index = 0) => {
+        return `
+            <div class="alarm-row flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100 animate-fadeIn">
+                <div class="text-[9px] font-black text-slate-300 w-6">#${index + 1}</div>
+                <input type="time" value="${time}" class="flex-1 p-2 rounded-lg border outline-none text-sm font-bold text-slate-700">
+                <select class="flex-1 p-2 rounded-lg border outline-none text-sm font-bold text-blue-700 bg-white">
+                    <option value="3" ${duration == '3' ? 'selected' : ''}>Short</option>
+                    <option value="7" ${duration == '7' ? 'selected' : ''}>Medium</option>
+                    <option value="15" ${duration == '15' ? 'selected' : ''}>Long</option>
+                </select>
+            </div>`;
+    };
+
     window.updateAlarmInputs = () => {
         const container = document.getElementById('alarmList');
         const count = document.getElementById('alarmCount').value;
@@ -220,16 +234,7 @@
         container.innerHTML = '';
         for(let i=0; i<count; i++) {
             const saved = current[i] || { t: '', d: '7' };
-            container.innerHTML += `
-                <div class="alarm-row flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100 animate-fadeIn">
-                    <div class="text-[9px] font-black text-slate-300 w-6">#${i+1}</div>
-                    <input type="time" value="${saved.t}" class="flex-1 p-2 rounded-lg border outline-none text-sm font-bold text-slate-700">
-                    <select class="flex-1 p-2 rounded-lg border outline-none text-sm font-bold text-blue-700 bg-white">
-                        <option value="3" ${saved.d == '3' ? 'selected' : ''}>3s</option>
-                        <option value="7" ${saved.d == '7' ? 'selected' : ''}>7s</option>
-                        <option value="15" ${saved.d == '15' ? 'selected' : ''}>15s</option>
-                    </select>
-                </div>`;
+            container.innerHTML += createAlarmRow(saved.t, saved.d, i);
         }
     };
 
@@ -242,16 +247,7 @@
             container.innerHTML = '';
             if(data.alarms) {
                 data.alarms.forEach((alarm, idx) => {
-                    container.innerHTML += `
-                        <div class="alarm-row flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <div class="text-[9px] font-black text-slate-300 w-6">#${idx+1}</div>
-                            <input type="time" value="${alarm.t}" class="flex-1 p-2 rounded-lg border outline-none text-sm font-bold text-slate-700">
-                            <select class="flex-1 p-2 rounded-lg border outline-none text-sm font-bold text-blue-700">
-                                <option value="3" ${alarm.d == '3' ? 'selected' : ''}>3s</option>
-                                <option value="7" ${alarm.d == '7' ? 'selected' : ''}>7s</option>
-                                <option value="15" ${alarm.d == '15' ? 'selected' : ''}>15s</option>
-                            </select>
-                        </div>`;
+                    container.innerHTML += createAlarmRow(alarm.t, alarm.d, idx);
                 });
             }
         } else {
