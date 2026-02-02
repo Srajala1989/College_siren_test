@@ -133,13 +133,34 @@
         const e = document.getElementById('email').value, p = document.getElementById('password').value;
         const btn = document.getElementById('loginBtn'), err = document.getElementById('authError');
         const rem = document.getElementById('remember').checked;
-        if(!e || !p) return;
+        if(!e || !p) 
+        {
+            err.innerText = "Please enter both email and password.";
+            err.style.display = "block";
+            return;
+        }
         err.style.display = "none"; btn.disabled = true;
         btn.innerHTML = `<span class="loader"></span> SIGNING IN...`;
         auth.setPersistence(rem ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
         .then(() => auth.signInWithEmailAndPassword(e, p))
         .catch(() => { resetLoginButton(); err.style.display = "block"; });
     }
+
+    // Trigger login when "Enter" is pressed in the password field
+document.getElementById("password").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // Prevents page reload
+        handleLogin();
+    }
+});
+
+// Optional: Also trigger for the email field
+document.getElementById("email").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        handleLogin();
+    }
+});
 
     function resetLoginButton() {
         const btn = document.getElementById('loginBtn');
