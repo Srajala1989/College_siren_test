@@ -61,7 +61,7 @@
         </div>
         <div style="font-size:12px; margin-bottom:15px; display:flex; justify-content:space-between;">
             <label><input type="checkbox" id="remember"> Remember me</label>
-            <span onclick="forgotPass()" style="color:var(--accent); cursor:pointer; font-weight:700">Forgot Password?</span>
+            <span id="forgotBtn" onclick="forgotPass()" style="color:var(--accent); cursor:pointer; font-weight:700">Forgot Password?</span>
         </div>
         <button id="loginBtn" class="btn" onclick="handleLogin()">SIGN IN</button>
     </div>
@@ -282,31 +282,45 @@ document.getElementById("email").addEventListener("keypress", function(event) {
         msg.style.display = "block";
     });
 }
-    function forgotPass() { 
+function forgotPass() { 
     const e = document.getElementById('email').value.trim(); 
     const err = document.getElementById('authError');
+    const btn = document.getElementById('forgotBtn'); // Matches the ID we added
     
     if(!e) {
         err.innerText = "Please enter your email address first.";
-        err.style.background = "#fee2e2"; // Red background
-        err.style.color = "#b91c1c";      // Red text
+        err.style.background = "#fee2e2"; 
+        err.style.color = "#b91c1c";
         err.style.display = "block";
         return;
     }
-    
+
+    // --- Processing State ---
+    const originalText = btn.innerText;
+    btn.innerText = "Sending..."; 
+    btn.style.opacity = "0.5";
+    btn.style.pointerEvents = "none"; // Stop user from clicking again
+    err.style.display = "none"; 
+
     auth.sendPasswordResetEmail(e)
     .then(() => {
         err.innerText = "Reset link sent! Check your Inbox and SPAM folder.";
-        err.style.background = "#dcfce7"; // Green background
-        err.style.color = "#166534";      // Green text
-        err.style.borderColor = "#bbf7d0";
+        err.style.background = "#dcfce7"; 
+        err.style.color = "#166534";
         err.style.display = "block";
     })
     .catch((error) => {
         err.innerText = "Error: " + error.message;
         err.style.background = "#fee2e2";
+        err.style.color = "#b91c1c";
         err.style.display = "block";
-    }); 
+    })
+    .finally(() => {
+        // --- Restore original state ---
+        btn.innerText = originalText;
+        btn.style.opacity = "1";
+        btn.style.pointerEvents = "auto";
+    });
 }
 </script>
 </body>
