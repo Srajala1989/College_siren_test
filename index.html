@@ -3,155 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siren Control Panel | GPW Holenarasipura</title>
-    
+    <title>Siren System | GPWH Admin</title>
     <style>
-        :root {
-            --primary: #0f172a;
-            --accent: #2563eb;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-        }
-
-        body { background-color: var(--bg); font-family: 'Inter', system-ui, sans-serif; margin: 0; color: #334155; }
+        :root { --primary: #0f172a; --accent: #2563eb; --bg: #f8fafc; --white: #ffffff; }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; margin: 0; color: #334155; }
         
-        /* Navbar */
+        /* Navbar & Top Right Account */
         .navbar { 
-            background: white; padding: 0.75rem 2rem; display: flex; 
-            justify-content: space-between; align-items: center; 
-            border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100;
+            background: var(--white); padding: 0.75rem 1.5rem; display: flex; 
+            justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;
         }
-        .nav-brand { display: flex; align-items: center; gap: 12px; }
-        .nav-logo { width: 40px; height: 40px; border-radius: 6px; }
-        .nav-title h1 { font-size: 1rem; margin: 0; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* Profile Menu */
+        .nav-brand h1 { font-size: 0.9rem; margin: 0; text-transform: uppercase; color: var(--primary); }
         .profile-menu { position: relative; }
-        .profile-btn { 
-            background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 16px; 
-            border-radius: 99px; font-size: 13px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; gap: 8px; transition: 0.2s;
-        }
-        .profile-btn:hover { background: #e2e8f0; }
-        .dropdown { 
-            display: none; position: absolute; right: 0; top: 110%; 
-            background: white; min-width: 180px; border-radius: 12px; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; overflow: hidden;
-        }
+        .profile-btn { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .dropdown { display: none; position: absolute; right: 0; top: 110%; background: white; min-width: 150px; border-radius: 8px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; z-index: 1000; }
         .profile-menu:hover .dropdown { display: block; }
-        .dropdown-item { 
-            width: 100%; text-align: left; padding: 12px 16px; border: none; 
-            background: none; font-size: 13px; cursor: pointer; color: #475569;
-        }
-        .dropdown-item:hover { background: #f8fafc; color: var(--accent); }
-        .dropdown-item.logout { color: var(--danger); border-top: 1px solid #f1f5f9; }
+        .dropdown button { width: 100%; text-align: left; padding: 10px; border: none; background: none; font-size: 13px; cursor: pointer; }
 
-        /* Main Layout */
-        .main-content { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; }
-        
-        .card { background: white; border-radius: 16px; padding: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .card-header { margin-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem; }
-        .card-header h2 { font-size: 0.875rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+        /* Main Tabs Navigation */
+        .tab-nav { display: flex; background: var(--white); border-bottom: 1px solid #e2e8f0; justify-content: space-around; }
+        .tab-link { padding: 1rem; cursor: pointer; font-size: 13px; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; transition: 0.2s; }
+        .tab-link.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-        /* Mode Selection */
-        .mode-grid { display: flex; flex-direction: column; gap: 0.75rem; }
-        .mode-card { 
-            padding: 1rem; border: 1px solid #e2e8f0; border-radius: 10px; 
-            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between;
-        }
-        .mode-card:hover { border-color: var(--accent); background: #eff6ff; }
-        .mode-card.active { border-color: var(--accent); background: #eff6ff; border-width: 2px; }
-        .mode-info b { font-size: 14px; display: block; }
-        .mode-info span { font-size: 12px; color: #64748b; }
-        
-        /* Manual Trigger */
-        .siren-panel { text-align: center; }
-        .siren-btn { 
-            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #f1f5f9; 
-            background: var(--success); color: white; font-weight: 800; cursor: pointer; 
-            margin: 1rem auto; transition: 0.3s; font-size: 1rem;
-        }
-        .siren-btn.active { background: var(--danger); border-color: #fee2e2; transform: scale(1.05); box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); }
-
-        /* Login Page */
-        .login-screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: #0f172a; }
-        .login-card { background: white; padding: 2.5rem; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        .input-group { margin-bottom: 1rem; }
-        .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #64748b; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+        /* Content Sections */
+        .main-content { max-width: 600px; margin: 1.5rem auto; padding: 0 1rem; }
+        .card { background: var(--white); border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
         .hidden { display: none !important; }
+
+        /* Siren Button Styling */
+        .siren-btn { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #f1f5f9; background: #22c55e; color: white; font-weight: 800; cursor: pointer; margin: 1rem auto; display: block; transition: 0.3s; }
+        .siren-btn.active { background: #ef4444; border-color: #fee2e2; box-shadow: 0 0 20px rgba(239,68,68,0.4); }
+
+        /* Mode Selection Buttons */
+        .mode-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .mode-item.active { background: #eff6ff; border-color: var(--accent); color: var(--accent); }
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; background: #cbd5e1; }
+        .mode-item.active .status-dot { background: var(--accent); }
+
+        /* Login Screen */
+        .login-wrap { height: 80vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .login-box { background: white; padding: 2.5rem; border-radius: 16px; width: 100%; max-width: 340px; border: 1px solid #e2e8f0; text-align: center; }
+        .login-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; }
+        .login-box button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div id="loginPage" class="login-screen">
-    <div class="login-card">
-        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">Welcome back</h2>
-        <p style="color: #64748b; margin-bottom: 2rem; font-size: 14px;">Sign in to manage the siren system.</p>
-        
-        <div class="input-group">
-            <label>ADMIN EMAIL</label>
-            <input type="email" id="email" placeholder="admin@gpwh.com">
-        </div>
-        <div class="input-group">
-            <label>PASSWORD</label>
-            <input type="password" id="password" placeholder="••••••••">
-        </div>
-        <button onclick="handleLogin()" style="width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 1rem;">Sign In</button>
+<div id="loginPage" class="login-wrap">
+    <div class="login-box">
+        <h2>Admin Sign In</h2>
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
     </div>
 </div>
 
 <div id="dashboardPage" class="hidden">
     <nav class="navbar">
-        <div class="nav-brand">
-            <img src="logo.png" class="nav-logo" onerror="this.src='https://via.placeholder.com/40'">
-            <div class="nav-title">
-                <h1>GPW Holenarasipura</h1>
-            </div>
-        </div>
+        <div class="nav-brand"><h1>GPW Holenarasipura</h1></div>
         <div class="profile-menu">
-            <button class="profile-btn">Admin Panel ▼</button>
+            <button class="profile-btn">ADMIN ▾</button>
             <div class="dropdown">
-                <button class="dropdown-item" onclick="resetPass()">Change Password</button>
-                <button class="dropdown-item logout" onclick="handleLogout()">Log Out</button>
+                <button onclick="auth.signOut()">Log Out</button>
             </div>
         </div>
     </nav>
 
+    <div class="tab-nav">
+        <div class="tab-link active" onclick="showTab('tab-manual')">Manual Siren</div>
+        <div class="tab-link" onclick="showTab('tab-selection')">Mode Selection</div>
+        <div class="tab-link" onclick="showTab('tab-settings')">Mode Settings</div>
+    </div>
+
     <div class="main-content">
-        <div class="card">
-            <div class="card-header">
-                <h2>Operational Modes</h2>
-            </div>
-            <div class="mode-grid">
-                <div class="mode-card" id="m_regular" onclick="updateMode('regular')">
-                    <div class="mode-info">
-                        <b>Regular Mode</b>
-                        <span>Standard class intervals & lunch breaks</span>
-                    </div>
-                </div>
-                <div class="mode-card" id="m_exam" onclick="updateMode('exam')">
-                    <div class="mode-info">
-                        <b>Examination Mode</b>
-                        <span>Alerts for start, warning, and end of exams</span>
-                    </div>
-                </div>
-                <div class="mode-card" id="m_special" onclick="updateMode('special')">
-                    <div class="mode-info">
-                        <b>Special Event</b>
-                        <span>Custom timings for seminars or functions</span>
-                    </div>
-                </div>
+        <div id="tab-manual" class="tab-content">
+            <div class="card" style="text-align:center">
+                <p style="font-size:12px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Quick Trigger</p>
+                <button class="siren-btn" id="sirenBtn" onclick="toggleSiren()">TURN ON</button>
+                <p id="sirenText" style="font-weight:700; color:#64748b">STATUS: READY</p>
             </div>
         </div>
 
-        <div class="card siren-panel">
-            <div class="card-header">
-                <h2>Manual Trigger</h2>
+        <div id="tab-selection" class="tab-content hidden">
+            <div class="card">
+                <p style="font-size:12px; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-bottom:1rem">Active Operation Mode</p>
+                <div class="mode-item" id="m_regular" onclick="setMode('regular')">Regular Classes <div class="status-dot"></div></div>
+                <div class="mode-item" id="m_exam" onclick="setMode('exam')">Examination <div class="status-dot"></div></div>
+                <div class="mode-item" id="m_special" onclick="setMode('special')">Special Event <div class="status-dot"></div></div>
             </div>
-            <button class="siren-btn" id="sirenBtn" onclick="toggleSiren()">START</button>
-            <p id="statusTxt" style="font-size: 13px; font-weight: 600; color: #64748b; margin-top: 1rem;">SYSTEM READY</p>
+        </div>
+
+        <div id="tab-settings" class="tab-content hidden">
+            <div class="card">
+                <h3>Mode Configurations</h3>
+                <p style="font-size:14px; color:#64748b">Here you can define the siren duration and specific bell timings for each mode.</p>
+                <hr style="border:0; border-top:1px solid #f1f5f9; margin:1.5rem 0">
+                <div style="font-size:13px;">
+                    <label>Default Ring Duration (Seconds)</label>
+                    <input type="number" id="ringTime" value="5" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ddd; border-radius:5px">
+                </div>
+                <button onclick="saveSettings()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:6px; margin-top:1.5rem; font-weight:bold; cursor:pointer">Save Settings</button>
+            </div>
         </div>
     </div>
 </div>
@@ -177,53 +129,56 @@
         if(user) {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('dashboardPage').classList.remove('hidden');
-            syncData();
+            initApp();
         } else {
             document.getElementById('loginPage').classList.remove('hidden');
             document.getElementById('dashboardPage').classList.add('hidden');
         }
     });
 
-    function handleLogin() {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+    function login() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
     }
 
-    function handleLogout() { auth.signOut(); }
-
-    function resetPass() {
-        auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Reset link sent to your email!"));
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(tabId).classList.remove('hidden');
+        event.target.classList.add('active');
     }
 
-    function syncData() {
-        // Mode Sync
+    function initApp() {
         db.ref('siren_system/active_mode').on('value', snap => {
             const mode = snap.val() || 'regular';
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.mode-item').forEach(el => el.classList.remove('active'));
             document.getElementById('m_' + mode).classList.add('active');
         });
 
-        // Siren Sync
         db.ref('siren_system/manual_trigger/status').on('value', snap => {
             const isOn = snap.val();
             const btn = document.getElementById('sirenBtn');
-            const txt = document.getElementById('statusTxt');
+            const txt = document.getElementById('sirenText');
             if(isOn) {
-                btn.classList.add('active'); btn.innerText = "STOP";
-                txt.innerText = "SIREN IS ACTIVE"; txt.style.color = "#ef4444";
+                btn.classList.add('active'); btn.innerText = "TURN OFF";
+                txt.innerText = "STATUS: RINGING"; txt.style.color = "red";
             } else {
-                btn.classList.remove('active'); btn.innerText = "START";
-                txt.innerText = "SYSTEM READY"; txt.style.color = "#64748b";
+                btn.classList.remove('active'); btn.innerText = "TURN ON";
+                txt.innerText = "STATUS: READY"; txt.style.color = "#64748b";
             }
         });
     }
 
-    function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
-
+    function setMode(m) { db.ref('siren_system/active_mode').set(m); }
     function toggleSiren() {
         const ref = db.ref('siren_system/manual_trigger/status');
         ref.once('value', snap => ref.set(!snap.val()));
+    }
+    function saveSettings() {
+        const dur = document.getElementById('ringTime').value;
+        db.ref('siren_system/settings').set({ duration: dur })
+        .then(() => alert("Settings Updated!"));
     }
 </script>
 </body>
