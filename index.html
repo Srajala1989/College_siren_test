@@ -81,9 +81,9 @@
 
 <div id="appPage" class="hidden">
     <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('tab-dash', this)">Dashboard</button>
-        <button class="tab-btn" onclick="switchTab('tab-settings', this)">Settings</button>
-        <button class="tab-btn" onclick="switchTab('tab-account', this)">Account</button>
+        <button class="tab-btn active" id="btn-tab-dash" onclick="switchTab('tab-dash', this)">Dashboard</button>
+        <button class="tab-btn" id="btn-tab-settings" onclick="switchTab('tab-settings', this)">Settings</button>
+        <button class="tab-btn" id="btn-tab-account" onclick="switchTab('tab-account', this)">Account</button>
     </div>
     <div style="padding: 20px; max-width: 500px; margin: 0 auto;">
         <div id="tab-dash" class="tab-content">
@@ -140,22 +140,42 @@
         const e = document.getElementById('email').value, p = document.getElementById('password').value;
         const btn = document.getElementById('loginBtn'), err = document.getElementById('authError');
         const rem = document.getElementById('remember').checked;
+        
+        if(!e || !p) return;
         err.style.display = "none"; btn.disabled = true;
         btn.innerHTML = `<span class="loader"></span> SIGNING IN...`;
 
         auth.setPersistence(rem ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
         .then(() => auth.signInWithEmailAndPassword(e, p))
-        .catch(() => { btn.disabled = false; btn.innerText = "SIGN IN"; err.style.display = "block"; });
+        .catch(() => { 
+            resetLoginButton();
+            err.style.display = "block"; 
+        });
+    }
+
+    // NEW: Function to reset button state
+    function resetLoginButton() {
+        const btn = document.getElementById('loginBtn');
+        btn.disabled = false;
+        btn.innerText = "SIGN IN";
     }
 
     auth.onAuthStateChanged(user => {
         document.getElementById('loginPage').classList.toggle('hidden', user);
         document.getElementById('appPage').classList.toggle('hidden', !user);
         document.getElementById('logoutSection').classList.toggle('hidden', !user);
-        if(user) syncDashboard();
+        
+        if(user) {
+            syncDashboard();
+        } else {
+            // Reset UI for next login session
+            resetLoginButton();
+            document.getElementById('password').value = "";
+        }
     });
 
     function togglePass(id) { const x = document.getElementById(id); x.type = x.type === "password" ? "text" : "password"; }
+    
     function switchTab(id, b) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
         document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
@@ -168,6 +188,7 @@
             const m = snap.val() || 'regular';
             document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
             document.getElementById('m_' + m)?.classList.add('active');
+            document.getElementById('configMode').value = m;
         });
         db.ref('siren_system/manual_trigger/status').on('value', snap => {
             const isOn = snap.val();
@@ -181,17 +202,29 @@
     function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
 
     function loadAlarmUI() {
-        const mode = document.getElementById('configMode').value, count = parseInt(document.getElementById('alarmCount').value);
+        const mode = document.getElementById('configMode').value;
         const list = document.getElementById('alarmList');
+        
         db.ref(`siren_system/schedules/${mode}`).once('value', snap => {
-            const saved = snap.val() || [];
+            const savedData = snap.val() || [];
+            const countInput = document.getElementById('alarmCount');
+            
+            // If we just loaded the mode, match the UI count to the database length
+            // If the user is manually changing the number, use the user's number
+            let count = savedData.length > 0 ? savedData.length : 1;
+            if (event && event.target && event.target.id === "alarmCount") {
+                count = parseInt(countInput.value);
+            } else {
+                countInput.value = count;
+            }
+            
             list.innerHTML = "";
             for(let i=0; i<count; i++) {
                 const row = document.createElement('div'); row.className = 'alarm-row';
-                const dateH = mode === 'special' ? `<div class="full"><label>Date</label><input type="date" class="a-date" value="${saved[i]?.date || ''}"></div>` : ``;
-                row.innerHTML = `${dateH}<div><label>Time</label><input type="time" class="a-time" value="${saved[i]?.time || ''}"></div>
-                    <div><label>Length</label><select class="a-dur"><option value="3" ${saved[i]?.duration==3?'selected':''}>Short</option>
-                    <option value="6" ${saved[i]?.duration==6?'selected':''}>Medium</option><option value="12" ${saved[i]?.duration==12?'selected':''}>Long</option></select></div>`;
+                const dateH = mode === 'special' ? `<div class="full"><label>Date</label><input type="date" class="a-date" value="${savedData[i]?.date || ''}"></div>` : ``;
+                row.innerHTML = `${dateH}<div><label>Time</label><input type="time" class="a-time" value="${savedData[i]?.time || ''}"></div>
+                    <div><label>Length</label><select class="a-dur"><option value="3" ${savedData[i]?.duration==3?'selected':''}>Short</option>
+                    <option value="6" ${savedData[i]?.duration==6?'selected':''}>Medium</option><option value="12" ${savedData[i]?.duration==12?'selected':''}>Long</option></select></div>`;
                 list.appendChild(row);
             }
         });
@@ -199,8 +232,11 @@
 
     function saveSchedules() {
         const mode = document.getElementById('configMode').value, rows = document.querySelectorAll('.alarm-row');
-        let data = []; rows.forEach(r => { data.push({ time: r.querySelector('.a-time').value, duration: r.querySelector('.a-dur').value, date: r.querySelector('.a-date')?.value || null }); });
-        db.ref(`siren_system/schedules/${mode}`).set(data).then(() => alert("Saved."));
+        let data = []; rows.forEach(r => { 
+            const t = r.querySelector('.a-time').value;
+            if(t) { data.push({ time: t, duration: r.querySelector('.a-dur').value, date: r.querySelector('.a-date')?.value || null }); }
+        });
+        db.ref(`siren_system/schedules/${mode}`).set(data).then(() => alert("Settings Saved for " + mode.toUpperCase()));
     }
 
     function resetPass() { auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Link sent.")); }
