@@ -22,32 +22,21 @@
 
         button { width: 100%; padding: 13px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-login { background-color: #0056b3; color: white; margin-top: 5px; }
+        .btn-login:disabled { background-color: #94a3b8; cursor: not-allowed; }
         
         .mode-btn { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; margin-bottom: 12px; }
         .mode-btn.active { background-color: #0056b3; color: white; border-color: #0056b3; }
         
-        /* TOGGLE SIREN STYLES */
         .siren-trigger { 
-            background-color: #22c55e; /* Default Green for OFF */
-            color: white; height: 140px; width: 140px; border-radius: 50%; 
+            background-color: #22c55e; color: white; height: 140px; width: 140px; border-radius: 50%; 
             font-size: 16px; margin: 25px auto; border: 8px solid #f0fdf4;
-            box-shadow: 0 10px 15px rgba(34, 197, 94, 0.2);
         }
-        .siren-trigger.ringing { 
-            background-color: #dc2626; /* Red for ON */
-            border-color: #fee2e2;
-            box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
-            animation: pulse 1s infinite;
-        }
+        .siren-trigger.ringing { background-color: #dc2626; border-color: #fee2e2; animation: pulse 1s infinite; }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         
         .hidden { display: none !important; }
-        #errorMsg { color: #dc2626; font-size: 13px; font-weight: bold; margin-bottom: 12px; display: none; }
+        #statusDisplay { color: #dc2626; font-size: 13px; font-weight: bold; margin-bottom: 12px; background: #fee2e2; padding: 10px; border-radius: 6px; display: none; }
     </style>
 </head>
 <body>
@@ -65,32 +54,30 @@
 <div class="main-container">
     <div id="loginPage" class="card">
         <h2 style="margin-top:0; color:#1e293b;">Admin Login</h2>
-        <div id="errorMsg">Invalid email or password</div>
+        
+        <div id="statusDisplay"></div>
+        
         <input type="email" id="email" placeholder="College Email ID">
         <input type="password" id="password" placeholder="Password">
         
         <div class="login-helpers">
             <div style="display:flex; align-items:center; gap:5px;">
-                <input type="checkbox" id="rememberMe" style="width:auto; margin:0;"> 
+                <input type="checkbox" id="rememberMe"> 
                 <label for="rememberMe">Remember me</label>
             </div>
-            <a href="#" onclick="forgotPassword()">Forgot password?</a>
+            <a href="#" id="forgotBtn">Forgot password?</a>
         </div>
         <button class="btn-login" id="loginBtn">SIGN IN</button>
     </div>
 
     <div id="dashboardPage" class="hidden">
         <div class="card">
-            <h3 style="color:#64748b; font-size:12px; text-transform:uppercase;">Select System Mode</h3>
-            <button class="mode-btn active" id="btnRegular" onclick="setMode('regular')">REGULAR MODE</button>
-            <button class="mode-btn" id="btnExam" onclick="setMode('exam')">EXAM MODE</button>
-            <button class="mode-btn" id="btnSpecial" onclick="setMode('special')">SPECIAL MODE</button>
-            
-            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #e2e8f0;">
-            
-            <h3 style="color:#64748b; font-size:12px; text-transform:uppercase;">Manual Siren (Toggle)</h3>
+            <h3>Select System Mode</h3>
+            <button class="mode-btn active" id="btnRegular">REGULAR MODE</button>
+            <button class="mode-btn" id="btnExam">EXAM MODE</button>
+            <button class="mode-btn" id="btnSpecial">SPECIAL MODE</button>
+            <hr>
             <button class="siren-trigger" id="manualBtn">TURN ON<br>SIREN</button>
-            <p id="sirenStatusText" style="font-size:12px; color:#94a3b8; margin-top:10px;">Siren is currently: <b>OFF</b></p>
         </div>
     </div>
 </div>
@@ -113,41 +100,40 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    let isSirenOn = false;
+    const loginBtn = document.getElementById('loginBtn');
+    const statusDisplay = document.getElementById('statusDisplay');
 
-    // Login logic
-    document.getElementById('loginBtn').onclick = () => {
+    function showStatus(msg, isError = true) {
+        statusDisplay.innerText = msg;
+        statusDisplay.style.display = 'block';
+        statusDisplay.style.background = isError ? '#fee2e2' : '#dcfce7';
+        statusDisplay.style.color = isError ? '#dc2626' : '#15803d';
+    }
+
+    loginBtn.onclick = () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
+
+        if(!email || !pass) {
+            showStatus("Please fill in all fields.");
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.innerText = "Connecting...";
+        showStatus("Authenticating...", false);
+
         auth.signInWithEmailAndPassword(email, pass)
             .then(() => {
                 document.getElementById('loginPage').classList.add('hidden');
                 document.getElementById('dashboardPage').classList.remove('hidden');
             })
-            .catch(() => { document.getElementById('errorMsg').style.display = 'block'; });
+            .catch((error) => {
+                loginBtn.disabled = false;
+                loginBtn.innerText = "SIGN IN";
+                showStatus("Login Error: " + error.message);
+            });
     };
-
-    // Forgot Password logic
-    window.forgotPassword = () => {
-        const email = document.getElementById('email').value;
-        if(!email) { alert("Please enter your email."); return; }
-        auth.sendPasswordResetEmail(email).then(() => alert("Reset link sent!"));
-    };
-
-    // Mode logic
-    function setMode(modeName) {
-        db.ref('siren_system/active_mode').set(modeName);
-        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-
-    // TOGGLE SIREN LOGIC
-    document.getElementById('manualBtn').onclick = () => {
-        const btn = document.getElementById('manualBtn');
-        const statusTxt = document.getElementById('sirenStatusText');
-        
-        isSirenOn = !isSirenOn; // Flip the state
-
-        if (isSirenOn) {
-            // TURN ON
-            db.ref('siren_system/manual_trigger').
+</script>
+</body>
+</html>
