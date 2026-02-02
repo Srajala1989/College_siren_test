@@ -6,45 +6,36 @@
     <title>GPW Holenarasipura Siren</title>
     
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
-        header { background: #ffffff; padding: 15px; display: flex; align-items: center; border-bottom: 2px solid #0056b3; gap: 15px; }
-        .logo-container { width: 60px; height: 60px; border: 1px solid #ccc; border-radius: 5px; overflow: hidden; background: #fff; }
-        .title-area h1 { margin: 0; font-size: 16px; color: #1a1a1a; text-transform: uppercase; line-height: 1.2; }
-        .title-area p { margin: 3px 0 0 0; font-size: 11px; color: #0056b3; font-weight: bold; letter-spacing: 1px; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        header { background: #fff; padding: 15px; display: flex; align-items: center; border-bottom: 2px solid #0056b3; gap: 15px; }
+        .logo-container { width: 60px; height: 60px; border: 1px solid #ccc; border-radius: 5px; overflow: hidden; }
+        .title-area h1 { margin: 0; font-size: 16px; color: #1a1a1a; text-transform: uppercase; }
+        .title-area p { margin: 3px 0 0 0; font-size: 11px; color: #0056b3; font-weight: bold; }
         
         .main-container { max-width: 450px; margin: 40px auto; padding: 20px; }
         .card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); text-align: center; }
         
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background: #f8fafc; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        .login-helpers { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin: 10px 0; color: #64748b; }
         
-        .login-helpers { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin: 5px 0 15px 0; color: #64748b; }
-        .login-helpers a { color: #0056b3; text-decoration: none; font-weight: bold; }
-
         button { width: 100%; padding: 13px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-login { background-color: #0056b3; color: white; margin-top: 5px; }
-        .btn-login:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .btn-login { background-color: #0056b3; color: white; }
         
         .mode-btn { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; margin-bottom: 12px; }
         .mode-btn.active { background-color: #0056b3; color: white; border-color: #0056b3; }
         
-        .siren-trigger { 
-            background-color: #22c55e; color: white; height: 140px; width: 140px; border-radius: 50%; 
-            font-size: 16px; margin: 25px auto; border: 8px solid #f0fdf4;
-        }
+        .siren-trigger { background-color: #22c55e; color: white; height: 140px; width: 140px; border-radius: 50%; font-size: 16px; margin: 20px auto; border: 8px solid #f0fdf4; }
         .siren-trigger.ringing { background-color: #dc2626; border-color: #fee2e2; animation: pulse 1s infinite; }
-
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         
         .hidden { display: none !important; }
-        #statusDisplay { color: #dc2626; font-size: 13px; font-weight: bold; margin-bottom: 12px; background: #fee2e2; padding: 10px; border-radius: 6px; display: none; }
+        #statusMsg { color: #dc2626; font-size: 13px; font-weight: bold; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo-container">
-        <img src="logo.png" alt="Logo" style="width:100%; height:100%; object-fit:contain;" onerror="this.src='https://via.placeholder.com/60?text=Logo'">
-    </div>
+    <div class="logo-container"><img src="logo.png" style="width:100%" onerror="this.src='https://via.placeholder.com/60'"></div>
     <div class="title-area">
         <h1>Govt. Polytechnic For Women Holenarasipura</h1>
         <p>SIREN MANAGEMENT SYSTEM</p>
@@ -53,31 +44,26 @@
 
 <div class="main-container">
     <div id="loginPage" class="card">
-        <h2 style="margin-top:0; color:#1e293b;">Admin Login</h2>
-        
-        <div id="statusDisplay"></div>
-        
-        <input type="email" id="email" placeholder="College Email ID">
+        <h2>Admin Login</h2>
+        <div id="statusMsg"></div>
+        <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Password">
-        
         <div class="login-helpers">
-            <div style="display:flex; align-items:center; gap:5px;">
-                <input type="checkbox" id="rememberMe"> 
-                <label for="rememberMe">Remember me</label>
-            </div>
-            <a href="#" id="forgotBtn">Forgot password?</a>
+            <label><input type="checkbox" id="rememberMe"> Remember me</label>
+            <a href="#" onclick="forgotPass()" style="color:#0056b3; text-decoration:none;">Forgot Password?</a>
         </div>
         <button class="btn-login" id="loginBtn">SIGN IN</button>
     </div>
 
     <div id="dashboardPage" class="hidden">
         <div class="card">
-            <h3>Select System Mode</h3>
-            <button class="mode-btn active" id="btnRegular">REGULAR MODE</button>
-            <button class="mode-btn" id="btnExam">EXAM MODE</button>
-            <button class="mode-btn" id="btnSpecial">SPECIAL MODE</button>
-            <hr>
-            <button class="siren-trigger" id="manualBtn">TURN ON<br>SIREN</button>
+            <p style="font-size:12px; color:#64748b; font-weight:bold;">SELECT SYSTEM MODE</p>
+            <button class="mode-btn" id="m_regular" onclick="updateMode('regular')">REGULAR MODE</button>
+            <button class="mode-btn" id="m_exam" onclick="updateMode('exam')">EXAM MODE</button>
+            <button class="mode-btn" id="m_special" onclick="updateMode('special')">SPECIAL MODE</button>
+            <hr style="border:1px solid #f0f2f5; margin:20px 0;">
+            <button class="siren-trigger" id="sirenBtn">TURN ON<br>SIREN</button>
+            <p id="sirenStatusText" style="font-size:12px;">Siren: <b style="color:green">OFF</b></p>
         </div>
     </div>
 </div>
@@ -95,45 +81,71 @@
         storageBucket: "websirentest.appspot.com",
         appId: "1:223793739773:web:651543788764020a324911"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
-    const loginBtn = document.getElementById('loginBtn');
-    const statusDisplay = document.getElementById('statusDisplay');
+    // REMEMBER ME CHECK ON LOAD
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            syncDashboard();
+        }
+    });
 
-    function showStatus(msg, isError = true) {
-        statusDisplay.innerText = msg;
-        statusDisplay.style.display = 'block';
-        statusDisplay.style.background = isError ? '#fee2e2' : '#dcfce7';
-        statusDisplay.style.color = isError ? '#dc2626' : '#15803d';
-    }
-
-    loginBtn.onclick = () => {
+    // LOGIN LOGIC
+    document.getElementById('loginBtn').onclick = () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
+        const remember = document.getElementById('rememberMe').checked;
+        const msg = document.getElementById('statusMsg');
 
-        if(!email || !pass) {
-            showStatus("Please fill in all fields.");
-            return;
-        }
-
-        loginBtn.disabled = true;
-        loginBtn.innerText = "Connecting...";
-        showStatus("Authenticating...", false);
-
-        auth.signInWithEmailAndPassword(email, pass)
-            .then(() => {
-                document.getElementById('loginPage').classList.add('hidden');
-                document.getElementById('dashboardPage').classList.remove('hidden');
-            })
-            .catch((error) => {
-                loginBtn.disabled = false;
-                loginBtn.innerText = "SIGN IN";
-                showStatus("Login Error: " + error.message);
-            });
+        auth.setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
+        .then(() => {
+            return auth.signInWithEmailAndPassword(email, pass);
+        })
+        .catch(() => {
+            msg.innerText = "Invalid Email or Password";
+            msg.style.display = "block";
+        });
     };
+
+    // DASHBOARD SYNC (MODES)
+    function syncDashboard() {
+        db.ref('siren_system/active_mode').on('value', (snap) => {
+            const mode = snap.val() || 'regular';
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('m_' + mode).classList.add('active');
+        });
+        
+        db.ref('siren_system/manual_trigger/status').on('value', (snap) => {
+            const isOn = snap.val();
+            const btn = document.getElementById('sirenBtn');
+            const txt = document.getElementById('sirenStatusText');
+            if(isOn) {
+                btn.classList.add('ringing'); btn.innerHTML = "TURN OFF";
+                txt.innerHTML = "Siren: <b style='color:red'>ON</b>";
+            } else {
+                btn.classList.remove('ringing'); btn.innerHTML = "TURN ON";
+                txt.innerHTML = "Siren: <b style='color:green'>OFF</b>";
+            }
+        });
+    }
+
+    function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
+
+    document.getElementById('sirenBtn').onclick = () => {
+        db.ref('siren_system/manual_trigger/status').once('value', snap => {
+            db.ref('siren_system/manual_trigger').update({ status: !snap.val(), timestamp: Date.now() });
+        });
+    };
+
+    function forgotPass() {
+        const email = document.getElementById('email').value;
+        if(!email) { alert("Type email first"); return; }
+        auth.sendPasswordResetEmail(email).then(() => alert("Reset link sent!"));
+    }
 </script>
 </body>
 </html>
