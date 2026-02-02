@@ -3,106 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siren System | GPWH Admin</title>
+    <title>Siren Management | GPWH</title>
     <style>
-        :root { --primary: #0f172a; --accent: #2563eb; --bg: #f8fafc; --white: #ffffff; }
+        :root { --primary: #0f172a; --accent: #2563eb; --bg: #f8fafc; --error: #ef4444; }
         body { background-color: var(--bg); font-family: 'Inter', sans-serif; margin: 0; color: #334155; }
         
-        /* Navbar & Top Right Account */
-        .navbar { 
-            background: var(--white); padding: 0.75rem 1.5rem; display: flex; 
-            justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;
-        }
-        .nav-brand h1 { font-size: 0.9rem; margin: 0; text-transform: uppercase; color: var(--primary); }
-        .profile-menu { position: relative; }
-        .profile-btn { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
-        .dropdown { display: none; position: absolute; right: 0; top: 110%; background: white; min-width: 150px; border-radius: 8px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; z-index: 1000; }
-        .profile-menu:hover .dropdown { display: block; }
-        .dropdown button { width: 100%; text-align: left; padding: 10px; border: none; background: none; font-size: 13px; cursor: pointer; }
-
-        /* Main Tabs Navigation */
-        .tab-nav { display: flex; background: var(--white); border-bottom: 1px solid #e2e8f0; justify-content: space-around; }
-        .tab-link { padding: 1rem; cursor: pointer; font-size: 13px; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; transition: 0.2s; }
-        .tab-link.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-        /* Content Sections */
-        .main-content { max-width: 600px; margin: 1.5rem auto; padding: 0 1rem; }
-        .card { background: var(--white); border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
-        .hidden { display: none !important; }
-
-        /* Siren Button Styling */
-        .siren-btn { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #f1f5f9; background: #22c55e; color: white; font-weight: 800; cursor: pointer; margin: 1rem auto; display: block; transition: 0.3s; }
-        .siren-btn.active { background: #ef4444; border-color: #fee2e2; box-shadow: 0 0 20px rgba(239,68,68,0.4); }
-
-        /* Mode Selection Buttons */
-        .mode-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-        .mode-item.active { background: #eff6ff; border-color: var(--accent); color: var(--accent); }
-        .status-dot { height: 8px; width: 8px; border-radius: 50%; background: #cbd5e1; }
-        .mode-item.active .status-dot { background: var(--accent); }
+        /* Header & Logo */
+        header { background: #fff; padding: 15px 20px; border-bottom: 2px solid #0056b3; display: flex; align-items: center; gap: 15px; }
+        .logo-box { width: 50px; height: 50px; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .header-text h1 { margin: 0; font-size: 14px; text-transform: uppercase; color: var(--primary); }
+        .header-text p { margin: 2px 0 0 0; font-size: 10px; font-weight: 800; color: #0056b3; }
 
         /* Login Screen */
-        .login-wrap { height: 80vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-        .login-box { background: white; padding: 2.5rem; border-radius: 16px; width: 100%; max-width: 340px; border: 1px solid #e2e8f0; text-align: center; }
-        .login-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; }
-        .login-box button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .login-wrap { max-width: 380px; margin: 60px auto; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 13px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        /* Tab Navigation */
+        .tab-bar { display: flex; background: #fff; border-bottom: 1px solid #e2e8f0; sticky; top: 0; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-size: 12px; font-weight: 700; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Dashboard: Siren & Modes */
+        .siren-btn { width: 130px; height: 130px; border-radius: 50%; border: 8px solid #f1f5f9; background: #22c55e; color: white; font-weight: 800; margin: 20px auto; display: block; }
+        .siren-btn.ringing { background: var(--error); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        
+        .mode-sel { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; }
+        .mode-sel.active { background: #eff6ff; border-color: var(--accent); color: var(--accent); }
+
+        /* Settings Grid */
+        .alarm-row { display: flex; gap: 10px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        .alarm-row label { font-size: 11px; font-weight: 700; color: #64748b; }
+
+        /* Helpers */
+        .hidden { display: none !important; }
+        .error-box { background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 15px; display: none; font-weight: bold; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
+<header>
+    <div class="logo-box"><img src="logo.png" onerror="this.src='https://via.placeholder.com/50?text=Logo'"></div>
+    <div class="header-text">
+        <h1>Govt. Polytechnic For Women Holenarasipura</h1>
+        <p>SIREN MANAGEMENT SYSTEM</p>
+    </div>
+</header>
+
 <div id="loginPage" class="login-wrap">
-    <div class="login-box">
-        <h2>Admin Sign In</h2>
-        <input type="email" id="email" placeholder="Email Address">
+    <div class="card">
+        <h2 style="margin-top:0">Sign In</h2>
+        <div id="authError" class="error-box">Invalid credentials. Please try again.</div>
+        <input type="email" id="email" placeholder="Admin Email ID">
         <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Login</button>
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin: 5px 0 15px;">
+            <label><input type="checkbox" id="remember"> Remember me</label>
+            <a href="#" onclick="forgotPass()" style="color:var(--accent); text-decoration:none; font-weight:bold;">Forgot Password?</a>
+        </div>
+        <button id="loginBtn" class="btn btn-primary" onclick="handleLogin()">SIGN IN</button>
     </div>
 </div>
 
-<div id="dashboardPage" class="hidden">
-    <nav class="navbar">
-        <div class="nav-brand"><h1>GPW Holenarasipura</h1></div>
-        <div class="profile-menu">
-            <button class="profile-btn">ADMIN ▾</button>
-            <div class="dropdown">
-                <button onclick="auth.signOut()">Log Out</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="tab-nav">
-        <div class="tab-link active" onclick="showTab('tab-manual')">Manual Siren</div>
-        <div class="tab-link" onclick="showTab('tab-selection')">Mode Selection</div>
-        <div class="tab-link" onclick="showTab('tab-settings')">Mode Settings</div>
+<div id="appPage" class="hidden">
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="showTab('tab-dash', this)">DASHBOARD</button>
+        <button class="tab-btn" onclick="showTab('tab-settings', this)">MODE SETTINGS</button>
+        <button class="tab-btn" onclick="showTab('tab-account', this)">ACCOUNT</button>
     </div>
 
-    <div class="main-content">
-        <div id="tab-manual" class="tab-content">
+    <div style="padding: 20px; max-width: 600px; margin: 0 auto;">
+        
+        <div id="tab-dash" class="tab-content">
             <div class="card" style="text-align:center">
-                <p style="font-size:12px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Quick Trigger</p>
-                <button class="siren-btn" id="sirenBtn" onclick="toggleSiren()">TURN ON</button>
-                <p id="sirenText" style="font-weight:700; color:#64748b">STATUS: READY</p>
-            </div>
-        </div>
-
-        <div id="tab-selection" class="tab-content hidden">
-            <div class="card">
-                <p style="font-size:12px; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-bottom:1rem">Active Operation Mode</p>
-                <div class="mode-item" id="m_regular" onclick="setMode('regular')">Regular Classes <div class="status-dot"></div></div>
-                <div class="mode-item" id="m_exam" onclick="setMode('exam')">Examination <div class="status-dot"></div></div>
-                <div class="mode-item" id="m_special" onclick="setMode('special')">Special Event <div class="status-dot"></div></div>
+                <span style="font-size:11px; font-weight:800; color:#94a3b8">MANUAL OVERRIDE</span>
+                <button id="sirenBtn" class="siren-btn" onclick="toggleSiren()">TURN ON</button>
+                <p id="sirenStatus" style="font-weight:700">STATUS: READY</p>
+                <hr style="margin:25px 0; border:0; border-top:1px solid #f1f5f9">
+                <span style="font-size:11px; font-weight:800; color:#94a3b8; display:block; margin-bottom:15px">SELECT ACTIVE MODE</span>
+                <div class="mode-sel" id="m_regular" onclick="updateMode('regular')">Regular Classes <span></span></div>
+                <div class="mode-sel" id="m_exam" onclick="updateMode('exam')">Exam Schedule <span></span></div>
+                <div class="mode-sel" id="m_special" onclick="updateMode('special')">Special Events <span></span></div>
             </div>
         </div>
 
         <div id="tab-settings" class="tab-content hidden">
             <div class="card">
-                <h3>Mode Configurations</h3>
-                <p style="font-size:14px; color:#64748b">Here you can define the siren duration and specific bell timings for each mode.</p>
-                <hr style="border:0; border-top:1px solid #f1f5f9; margin:1.5rem 0">
-                <div style="font-size:13px;">
-                    <label>Default Ring Duration (Seconds)</label>
-                    <input type="number" id="ringTime" value="5" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ddd; border-radius:5px">
-                </div>
-                <button onclick="saveSettings()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:6px; margin-top:1.5rem; font-weight:bold; cursor:pointer">Save Settings</button>
+                <label>Select Mode to Configure:</label>
+                <select id="configModeSelector" onchange="renderAlarmInputs()">
+                    <option value="regular">Regular Mode</option>
+                    <option value="exam">Exam Mode</option>
+                    <option value="special">Special Mode</option>
+                </select>
+                <label>Number of Alarms:</label>
+                <input type="number" id="alarmCount" value="1" min="1" max="20" onchange="renderAlarmInputs()">
+                
+                <div id="alarmContainer" style="margin-top:20px"></div>
+                
+                <button class="btn btn-primary" style="margin-top:20px" onclick="saveAlarms()">SAVE SETTINGS</button>
+            </div>
+        </div>
+
+        <div id="tab-account" class="tab-content hidden">
+            <div class="card">
+                <h3>Admin Management</h3>
+                <button class="btn" style="background:#f1f5f9; color:#475569; margin-bottom:10px" onclick="resetMyPass()">Change My Password</button>
+                <hr>
+                <h4>Add New Admin</h4>
+                <input type="email" id="newAdminEmail" placeholder="New Admin Email">
+                <input type="password" id="newAdminPass" placeholder="Temporary Password">
+                <button class="btn btn-primary" onclick="addNewAdmin()">CREATE USER</button>
+                <button class="btn" style="margin-top:40px; color:var(--error)" onclick="auth.signOut()">Log Out</button>
             </div>
         </div>
     </div>
@@ -125,60 +142,126 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
+    // LOGIN LOGIC
+    function handleLogin() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        const btn = document.getElementById('loginBtn');
+        const err = document.getElementById('authError');
+        const remember = document.getElementById('remember').checked;
+
+        err.style.display = "none";
+        btn.disabled = true;
+        btn.innerHTML = `<span class="loader"></span> Authenticating...`;
+
+        auth.setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
+        .then(() => auth.signInWithEmailAndPassword(email, pass))
+        .catch(e => {
+            btn.disabled = false;
+            btn.innerText = "SIGN IN";
+            err.style.display = "block";
+        });
+    }
+
     auth.onAuthStateChanged(user => {
         if(user) {
             document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('dashboardPage').classList.remove('hidden');
-            initApp();
+            document.getElementById('appPage').classList.remove('hidden');
+            syncApp();
         } else {
             document.getElementById('loginPage').classList.remove('hidden');
-            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('appPage').classList.add('hidden');
         }
     });
 
-    function login() {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
+    // NAVIGATION
+    function showTab(id, el) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.remove('hidden');
+        el.classList.add('active');
+        if(id === 'tab-settings') renderAlarmInputs();
     }
 
-    function showTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-        document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
-        document.getElementById(tabId).classList.remove('hidden');
-        event.target.classList.add('active');
-    }
-
-    function initApp() {
+    // DASHBOARD LOGIC
+    function syncApp() {
         db.ref('siren_system/active_mode').on('value', snap => {
-            const mode = snap.val() || 'regular';
-            document.querySelectorAll('.mode-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('m_' + mode).classList.add('active');
+            const m = snap.val() || 'regular';
+            document.querySelectorAll('.mode-sel').forEach(x => x.classList.remove('active'));
+            document.getElementById('m_'+m).classList.add('active');
         });
-
         db.ref('siren_system/manual_trigger/status').on('value', snap => {
             const isOn = snap.val();
             const btn = document.getElementById('sirenBtn');
-            const txt = document.getElementById('sirenText');
-            if(isOn) {
-                btn.classList.add('active'); btn.innerText = "TURN OFF";
-                txt.innerText = "STATUS: RINGING"; txt.style.color = "red";
-            } else {
-                btn.classList.remove('active'); btn.innerText = "TURN ON";
-                txt.innerText = "STATUS: READY"; txt.style.color = "#64748b";
-            }
+            btn.className = isOn ? 'siren-btn ringing' : 'siren-btn';
+            btn.innerText = isOn ? 'TURN OFF' : 'TURN ON';
+            document.getElementById('sirenStatus').innerText = isOn ? "STATUS: RINGING" : "STATUS: READY";
         });
     }
 
-    function setMode(m) { db.ref('siren_system/active_mode').set(m); }
     function toggleSiren() {
         const ref = db.ref('siren_system/manual_trigger/status');
-        ref.once('value', snap => ref.set(!snap.val()));
+        ref.once('value', s => ref.set(!s.val()));
     }
-    function saveSettings() {
-        const dur = document.getElementById('ringTime').value;
-        db.ref('siren_system/settings').set({ duration: dur })
-        .then(() => alert("Settings Updated!"));
+
+    function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
+
+    // SETTINGS LOGIC
+    function renderAlarmInputs() {
+        const mode = document.getElementById('configModeSelector').value;
+        const count = document.getElementById('alarmCount').value;
+        const container = document.getElementById('alarmContainer');
+        container.innerHTML = "";
+
+        for(let i=1; i<=count; i++) {
+            const row = document.createElement('div');
+            row.className = 'alarm-row';
+            let typeInput = mode === 'special' ? `<input type="date" class="a-date">` : `<span>#${i}</span>`;
+            row.innerHTML = `
+                ${typeInput}
+                <input type="time" class="a-time">
+                <select class="a-dur">
+                    <option value="short">Short (3s)</option>
+                    <option value="medium">Medium (6s)</option>
+                    <option value="long">Long (10s)</option>
+                </select>
+            `;
+            container.appendChild(row);
+        }
+    }
+
+    function saveAlarms() {
+        const mode = document.getElementById('configModeSelector').value;
+        const rows = document.querySelectorAll('.alarm-row');
+        let data = [];
+        rows.forEach(r => {
+            data.push({
+                time: r.querySelector('.a-time').value,
+                duration: r.querySelector('.a-dur').value,
+                date: r.querySelector('.a-date')?.value || null
+            });
+        });
+        db.ref(`siren_system/schedules/${mode}`).set(data).then(() => alert("Settings saved successfully!"));
+    }
+
+    // ACCOUNT LOGIC
+    function resetMyPass() {
+        auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Reset link sent to your email."));
+    }
+
+    function addNewAdmin() {
+        const email = document.getElementById('newAdminEmail').value;
+        const pass = document.getElementById('newAdminPass').value;
+        if(!email || !pass) return alert("Fill all fields");
+        // Firebase Auth doesn't allow creating users for others easily without Admin SDK, 
+        // but this logic will attempt to sign up if rules permit.
+        alert("Feature requires Firebase Admin SDK. User should sign up manually.");
+    }
+    
+    function forgotPass() {
+        const e = document.getElementById('email').value;
+        if(!e) return alert("Enter email first");
+        auth.sendPasswordResetEmail(e).then(() => alert("Reset link sent!"));
     }
 </script>
 </body>
