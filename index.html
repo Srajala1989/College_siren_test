@@ -15,16 +15,21 @@
         .logo-box img { width: 100%; height: 100%; object-fit: contain; }
         .header-text h1 { margin: 0; font-size: 13px; text-transform: uppercase; color: var(--primary); }
         .header-text p { margin: 0; font-size: 9px; font-weight: 800; color: #0056b3; }
-        .logout-link { color: var(--error); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer; border: 1px solid #fee2e2; padding: 5px 10px; border-radius: 6px; }
+        .logout-link { color: var(--error); font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid #fee2e2; padding: 5px 10px; border-radius: 6px; }
 
-        /* Login & Forms */
+        /* Forms & Inputs */
         .login-wrap { max-width: 360px; margin: 50px auto; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; }
-        .input-container { position: relative; width: 100%; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        .eye-icon { position: absolute; right: 12px; top: 20px; cursor: pointer; opacity: 0.6; }
+        .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .input-group { position: relative; width: 100%; margin: 8px 0; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .eye-icon { position: absolute; right: 12px; top: 12px; cursor: pointer; opacity: 0.6; z-index: 10; }
+        .error-box { background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 15px; display: none; border: 1px solid #fecaca; }
 
-        /* Dashboard & Mode UI */
+        /* Loader */
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid white; border-radius: 50%; width: 14px; height: 14px; animation: spin 0.8s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Dashboard & Tabs */
         .tab-bar { display: flex; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-size: 11px; font-weight: 800; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; text-transform: uppercase; }
         .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -33,20 +38,15 @@
         .siren-btn.ringing { background: var(--error); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-        .mode-card { 
-            border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 12px; 
-            cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; 
-        }
-        .mode-card.active { border-color: var(--accent); background: #eff6ff; }
-        .mode-card.active::after { content: '✓'; background: var(--accent); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .mode-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+        .mode-card.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
+        .mode-card.active::after { content: '✓'; background: var(--accent); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
 
-        /* Alarm Rows */
         .alarm-row { background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .full { grid-column: 1 / -1; }
-        label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; }
-
         .hidden { display: none !important; }
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; background: var(--accent); color: white; }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -59,21 +59,23 @@
             <p>SIREN MANAGEMENT SYSTEM</p>
         </div>
     </div>
-    <div id="logoutSection" class="hidden">
-        <span class="logout-link" onclick="auth.signOut()">LOGOUT</span>
-    </div>
+    <div id="logoutSection" class="hidden"><span class="logout-link" onclick="auth.signOut()">LOGOUT</span></div>
 </header>
 
 <div id="loginPage" class="login-wrap">
     <div class="card">
         <h2 style="margin:0 0 15px 0; font-size: 18px;">Admin Login</h2>
+        <div id="authError" class="error-box">Invalid credentials. Please try again.</div>
         <input type="email" id="email" placeholder="Email Address">
-        <div class="input-container">
+        <div class="input-group">
             <input type="password" id="password" placeholder="Password">
             <span class="eye-icon" onclick="togglePass('password')">👁️</span>
         </div>
+        <div style="font-size:12px; margin-bottom:15px; display:flex; justify-content:space-between;">
+            <label><input type="checkbox" id="remember"> Remember me</label>
+            <span onclick="forgotPass()" style="color:var(--accent); cursor:pointer; font-weight:700">Forgot Password?</span>
+        </div>
         <button id="loginBtn" class="btn" onclick="handleLogin()">SIGN IN</button>
-        <p onclick="forgotPass()" style="font-size:11px; text-align:center; color:var(--accent); cursor:pointer; font-weight:700; margin-top:15px;">Forgot Password?</p>
     </div>
 </div>
 
@@ -83,7 +85,6 @@
         <button class="tab-btn" onclick="switchTab('tab-settings', this)">Settings</button>
         <button class="tab-btn" onclick="switchTab('tab-account', this)">Account</button>
     </div>
-
     <div style="padding: 20px; max-width: 500px; margin: 0 auto;">
         <div id="tab-dash" class="tab-content">
             <div class="card" style="text-align:center">
@@ -95,26 +96,23 @@
                 <div class="mode-card" id="m_special" onclick="updateMode('special')">Special Event</div>
             </div>
         </div>
-
         <div id="tab-settings" class="tab-content hidden">
             <div class="card">
-                <label>Configuration Mode</label>
+                <label style="font-size:11px; font-weight:800;">Configuration Mode</label>
                 <select id="configMode" onchange="loadAlarmUI()">
                     <option value="regular">Regular Mode</option>
                     <option value="exam">Exam Mode</option>
                     <option value="special">Special Mode</option>
                 </select>
-                <label>Total Alarms</label>
+                <label style="font-size:11px; font-weight:800;">Total Alarms</label>
                 <input type="number" id="alarmCount" value="1" min="1" max="20" onchange="loadAlarmUI()">
                 <div id="alarmList"></div>
                 <button class="btn" style="margin-top:10px" onclick="saveSchedules()">SAVE SETTINGS</button>
             </div>
         </div>
-
         <div id="tab-account" class="tab-content hidden">
             <div class="card">
                 <h3>Account Security</h3>
-                <p style="font-size:12px; color:#64748b; margin-bottom:20px">Click below to receive a password reset link at your registered email.</p>
                 <button class="btn" style="background:#f1f5f9; color:var(--primary)" onclick="resetPass()">CHANGE PASSWORD</button>
             </div>
         </div>
@@ -138,114 +136,75 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // AUTH
     function handleLogin() {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(e => alert("Login Failed: " + e.message));
+        const e = document.getElementById('email').value, p = document.getElementById('password').value;
+        const btn = document.getElementById('loginBtn'), err = document.getElementById('authError');
+        const rem = document.getElementById('remember').checked;
+        err.style.display = "none"; btn.disabled = true;
+        btn.innerHTML = `<span class="loader"></span> SIGNING IN...`;
+
+        auth.setPersistence(rem ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
+        .then(() => auth.signInWithEmailAndPassword(e, p))
+        .catch(() => { btn.disabled = false; btn.innerText = "SIGN IN"; err.style.display = "block"; });
     }
 
     auth.onAuthStateChanged(user => {
-        const loginPage = document.getElementById('loginPage');
-        const appPage = document.getElementById('appPage');
-        const logoutSec = document.getElementById('logoutSection');
-        if(user) {
-            loginPage.classList.add('hidden'); appPage.classList.remove('hidden'); logoutSec.classList.remove('hidden');
-            syncDashboard();
-        } else {
-            loginPage.classList.remove('hidden'); appPage.classList.add('hidden'); logoutSec.classList.add('hidden');
-        }
+        document.getElementById('loginPage').classList.toggle('hidden', user);
+        document.getElementById('appPage').classList.toggle('hidden', !user);
+        document.getElementById('logoutSection').classList.toggle('hidden', !user);
+        if(user) syncDashboard();
     });
 
-    // UI UTILS
-    function togglePass(id) {
-        const x = document.getElementById(id);
-        x.type = x.type === "password" ? "text" : "password";
-    }
-
-    function switchTab(id, btn) {
+    function togglePass(id) { const x = document.getElementById(id); x.type = x.type === "password" ? "text" : "password"; }
+    function switchTab(id, b) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.remove('hidden');
-        btn.classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.remove('hidden'); b.classList.add('active');
         if(id === 'tab-settings') loadAlarmUI();
     }
 
-    // DASHBOARD
     function syncDashboard() {
         db.ref('siren_system/active_mode').on('value', snap => {
             const m = snap.val() || 'regular';
             document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            document.getElementById('m_' + m).classList.add('active');
+            document.getElementById('m_' + m)?.classList.add('active');
         });
         db.ref('siren_system/manual_trigger/status').on('value', snap => {
             const isOn = snap.val();
-            const btn = document.getElementById('sirenBtn');
-            btn.className = isOn ? 'siren-btn ringing' : 'siren-btn';
-            btn.innerText = isOn ? 'TURN OFF' : 'TURN ON';
-            document.getElementById('sirenStatus').innerText = isOn ? "SIREN RINGING" : "SYSTEM READY";
+            const b = document.getElementById('sirenBtn'), t = document.getElementById('sirenStatus');
+            b.className = isOn ? 'siren-btn ringing' : 'siren-btn';
+            b.innerText = isOn ? 'TURN OFF' : 'TURN ON'; t.innerText = isOn ? "SIREN RINGING" : "SYSTEM READY";
         });
     }
 
-    function toggleSiren() {
-        const ref = db.ref('siren_system/manual_trigger/status');
-        ref.once('value', s => ref.set(!s.val()));
-    }
-
+    function toggleSiren() { const ref = db.ref('siren_system/manual_trigger/status'); ref.once('value', s => ref.set(!s.val())); }
     function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
 
-    // SETTINGS (NON-DESTRUCTIVE)
-    let currentSchedules = {};
-
     function loadAlarmUI() {
-        const mode = document.getElementById('configMode').value;
-        const count = parseInt(document.getElementById('alarmCount').value);
+        const mode = document.getElementById('configMode').value, count = parseInt(document.getElementById('alarmCount').value);
         const list = document.getElementById('alarmList');
-        
         db.ref(`siren_system/schedules/${mode}`).once('value', snap => {
             const saved = snap.val() || [];
             list.innerHTML = "";
             for(let i=0; i<count; i++) {
-                const row = document.createElement('div');
-                row.className = 'alarm-row';
-                const dateHtml = mode === 'special' ? `<div class="full"><label>Date</label><input type="date" class="a-date" value="${saved[i]?.date || ''}"></div>` : ``;
-                row.innerHTML = `
-                    ${dateHtml}
-                    <div><label>Time</label><input type="time" class="a-time" value="${saved[i]?.time || ''}"></div>
-                    <div><label>Length</label><select class="a-dur">
-                        <option value="3" ${saved[i]?.duration == '3' ? 'selected' : ''}>Short</option>
-                        <option value="6" ${saved[i]?.duration == '6' ? 'selected' : ''}>Medium</option>
-                        <option value="12" ${saved[i]?.duration == '12' ? 'selected' : ''}>Long</option>
-                    </select></div>
-                `;
+                const row = document.createElement('div'); row.className = 'alarm-row';
+                const dateH = mode === 'special' ? `<div class="full"><label>Date</label><input type="date" class="a-date" value="${saved[i]?.date || ''}"></div>` : ``;
+                row.innerHTML = `${dateH}<div><label>Time</label><input type="time" class="a-time" value="${saved[i]?.time || ''}"></div>
+                    <div><label>Length</label><select class="a-dur"><option value="3" ${saved[i]?.duration==3?'selected':''}>Short</option>
+                    <option value="6" ${saved[i]?.duration==6?'selected':''}>Medium</option><option value="12" ${saved[i]?.duration==12?'selected':''}>Long</option></select></div>`;
                 list.appendChild(row);
             }
         });
     }
 
     function saveSchedules() {
-        const mode = document.getElementById('configMode').value;
-        const rows = document.querySelectorAll('.alarm-row');
-        let data = [];
-        rows.forEach(r => {
-            data.push({
-                time: r.querySelector('.a-time').value,
-                duration: r.querySelector('.a-dur').value,
-                date: r.querySelector('.a-date')?.value || null
-            });
-        });
-        db.ref(`siren_system/schedules/${mode}`).set(data).then(() => alert("Settings Saved."));
+        const mode = document.getElementById('configMode').value, rows = document.querySelectorAll('.alarm-row');
+        let data = []; rows.forEach(r => { data.push({ time: r.querySelector('.a-time').value, duration: r.querySelector('.a-dur').value, date: r.querySelector('.a-date')?.value || null }); });
+        db.ref(`siren_system/schedules/${mode}`).set(data).then(() => alert("Saved."));
     }
 
-    function resetPass() {
-        auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Reset link sent to your email."));
-    }
-
-    function forgotPass() {
-        const e = document.getElementById('email').value;
-        if(!e) return alert("Enter your email first.");
-        auth.sendPasswordResetEmail(e).then(() => alert("Reset link sent."));
-    }
+    function resetPass() { auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Link sent.")); }
+    function forgotPass() { const e = document.getElementById('email').value; if(!e) return alert("Enter email."); auth.sendPasswordResetEmail(e).then(() => alert("Sent.")); }
 </script>
 </body>
 </html>
