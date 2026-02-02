@@ -180,19 +180,6 @@
         t.innerText = isOn ? "SIREN RINGING" : "SYSTEM READY";
     });
 }
-
-    // 2. Fetch Manual Status and Update Button Labels
-    db.ref('siren_system/manual_trigger/status').on('value', snap => {
-        const isOn = snap.val();
-        const b = document.getElementById('sirenBtn'), t = document.getElementById('sirenStatus');
-        const lbl = document.getElementById('triggerStatus'), txt = document.getElementById('sirenTxt');
-        
-        b.className = isOn ? 'siren-btn ringing' : 'siren-btn';
-        txt.innerText = isOn ? 'TURN OFF' : 'TURN ON';
-        lbl.innerText = isOn ? '[ON]' : '[OFF]';
-        t.innerText = isOn ? "SIREN RINGING" : "SYSTEM READY";
-    });
-}
     function toggleSiren() { const ref = db.ref('siren_system/manual_trigger/status'); ref.once('value', s => ref.set(!s.val())); }
     function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
 
