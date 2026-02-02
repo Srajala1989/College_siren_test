@@ -5,66 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPW Holenarasipura | Siren Admin</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
-        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; margin: 0; }
-        .main-card { max-width: 450px; margin: 40px auto; background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        /* BASE STYLES - Works without external links */
+        body { 
+            background-color: #f1f5f9; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header { 
+            background: white; 
+            padding: 15px 25px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .logo-box {
+            width: 60px; height: 60px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .college-name {
+            font-size: 20px; font-weight: 900; color: #1e293b; margin: 0; text-transform: uppercase;
+        }
+        .subtitle {
+            font-size: 12px; color: #2563eb; margin: 5px 0 0 0; font-weight: bold; letter-spacing: 1px;
+        }
+        .container {
+            display: flex; justify-content: center; align-items: center; flex: 1;
+        }
+        .login-card {
+            background: white; padding: 40px; border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
+            text-align: center;
+        }
+        input {
+            width: 100%; padding: 12px; margin: 10px 0;
+            border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;
+            background: #f8fafc;
+        }
+        button {
+            width: 100%; padding: 14px; background: #1d4ed8; color: white;
+            border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+            font-size: 16px; margin-top: 10px;
+        }
+        button:hover { background: #1e40af; }
         .hidden { display: none !important; }
-        header { background: white; border-bottom: 2px solid #e2e8f0; padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 50; }
-        
-        /* Ensures the long college name stays clean */
-        .college-title {
-            font-size: 1.1rem;
-            line-height: 1.2;
-            font-weight: 900;
-            color: #1e293b;
-            text-transform: uppercase;
-        }
-        @media (min-width: 768px) {
-            .college-title { font-size: 1.4rem; }
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <div style="width: 60px; height: 60px; min-width: 60px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #e2e8f0;">
-            <img src="logo.png" alt="Logo" style="max-width: 90%; max-height: 90%; object-fit: contain;" onerror="this.src='https://via.placeholder.com/60?text=GPW'">
+        <div class="logo-box">
+            <img src="logo.png" alt="Logo" style="max-width:90%; max-height:90%;" onerror="this.src='https://via.placeholder.com/50'">
         </div>
         <div>
-            <h1 class="college-title">Govt. Polytechnic For Women Holenarasipura</h1>
-            <p class="text-[9px] md:text-[10px] font-bold text-blue-600 uppercase tracking-[0.15em] m-0 mt-1">Automatic Siren Management System</p>
+            <p class="college-name">Govt. Polytechnic For Women Holenarasipura</p>
+            <p class="subtitle">Automatic Siren Management System</p>
         </div>
     </header>
 
-    <div class="container mx-auto px-4">
-        <div id="loginSection" class="main-card">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-user-shield text-2xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800">Admin Login</h2>
-            </div>
-            <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email" class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-blue-500 bg-slate-50">
-                <input type="password" id="password" placeholder="Password" class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-blue-500 bg-slate-50">
-                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-all shadow-md">Sign In</button>
-            </div>
+    <div class="container">
+        <div id="loginSection" class="login-card">
+            <h2 style="margin-top:0;">Admin Login</h2>
+            <input type="email" id="email" placeholder="Enter Email">
+            <input type="password" id="password" placeholder="Enter Password">
+            <button id="loginBtn">Sign In</button>
         </div>
 
-        <div id="dashboardSection" class="hidden py-8 text-center">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-md mx-auto">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Manual Siren Trigger</h3>
-                <button id="sirenBtn" class="w-44 h-44 rounded-full bg-red-600 text-white font-black text-xl shadow-2xl border-[12px] border-red-50 border-solid active:scale-90 transition-all">
-                    PUSH<br>TO RING
-                </button>
-                <div class="mt-8 flex items-center justify-center gap-2">
-                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <p class="text-slate-500 text-sm font-medium">System Online & Connected</p>
-                </div>
-            </div>
+        <div id="dashboardSection" class="login-card hidden">
+            <h3>Siren Control</h3>
+            <button id="sirenBtn" style="height:150px; width:150px; border-radius:50%; background:red; font-size:20px;">RING SIREN</button>
         </div>
     </div>
 
@@ -79,4 +94,33 @@
             databaseURL: "https://websirentest-default-rtdb.firebaseio.com",
             projectId: "websirentest",
             storageBucket: "websirentest.appspot.com",
-            appId: "1:223793739773:web
+            appId: "1:223793739773:web:651543788764020a324911"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        document.getElementById('loginBtn').onclick = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, pass)
+                .then(() => {
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('dashboardSection').classList.remove('hidden');
+                })
+                .catch(err => alert(err.message));
+        };
+
+        document.getElementById('sirenBtn').onclick = () => {
+            db.ref('siren_system/manual_trigger').set({
+                status: true,
+                timestamp: Date.now()
+            }).then(() => {
+                alert("Signal Sent!");
+                setTimeout(() => db.ref('siren_system/manual_trigger/status').set(false), 2000);
+            });
+        };
+    </script>
+</body>
+</html>
