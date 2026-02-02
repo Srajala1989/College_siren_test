@@ -6,80 +6,59 @@
     <title>GPW Holenarasipura | Siren Admin</title>
     
     <style>
-        /* BASE STYLES - Works without external links */
-        body { 
-            background-color: #f1f5f9; 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            margin: 0; 
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        header { 
-            background: white; 
-            padding: 15px 25px; 
-            display: flex; 
-            align-items: center; 
-            gap: 20px; 
-            border-bottom: 2px solid #e2e8f0;
-        }
-        .logo-box {
-            width: 60px; height: 60px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .college-name {
-            font-size: 20px; font-weight: 900; color: #1e293b; margin: 0; text-transform: uppercase;
-        }
-        .subtitle {
-            font-size: 12px; color: #2563eb; margin: 5px 0 0 0; font-weight: bold; letter-spacing: 1px;
-        }
-        .container {
-            display: flex; justify-content: center; align-items: center; flex: 1;
-        }
-        .login-card {
-            background: white; padding: 40px; border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
-            text-align: center;
-        }
-        input {
-            width: 100%; padding: 12px; margin: 10px 0;
-            border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;
-            background: #f8fafc;
-        }
-        button {
-            width: 100%; padding: 14px; background: #1d4ed8; color: white;
-            border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
-            font-size: 16px; margin-top: 10px;
-        }
-        button:hover { background: #1e40af; }
+        body { background-color: #f1f5f9; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background: white; padding: 15px 25px; display: flex; align-items: center; gap: 20px; border-bottom: 2px solid #e2e8f0; }
+        .logo-box { width: 60px; height: 60px; min-width: 60px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #fff; }
+        .college-name { font-size: 1.1rem; font-weight: 900; color: #1e293b; margin: 0; text-transform: uppercase; }
+        .container { display: flex; flex-direction: column; align-items: center; flex: 1; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; margin-bottom: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; background: #f8fafc; }
+        .btn-blue { width: 100%; padding: 14px; background: #1d4ed8; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-red { width: 140px; height: 140px; border-radius: 50%; background: #dc2626; color: white; border: 8px solid #fee2e2; font-weight: 900; cursor: pointer; box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3); }
+        .mode-badge { padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; background: #dbeafe; color: #1e40af; }
         .hidden { display: none !important; }
+        #errorMessage { color: #dc2626; font-size: 14px; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo-box">
-            <img src="logo.png" alt="Logo" style="max-width:90%; max-height:90%;" onerror="this.src='https://via.placeholder.com/50'">
+            <img src="logo.png" alt="Logo" style="max-width:90%; max-height:90%;" onerror="this.src='https://via.placeholder.com/60?text=GPW'">
         </div>
         <div>
             <p class="college-name">Govt. Polytechnic For Women Holenarasipura</p>
-            <p class="subtitle">Automatic Siren Management System</p>
+            <p style="font-size:10px; color:#2563eb; font-weight:bold; margin:0;">SIREN MANAGEMENT SYSTEM</p>
         </div>
     </header>
 
     <div class="container">
-        <div id="loginSection" class="login-card">
+        <div id="loginSection" class="card">
             <h2 style="margin-top:0;">Admin Login</h2>
-            <input type="email" id="email" placeholder="Enter Email">
-            <input type="password" id="password" placeholder="Enter Password">
-            <button id="loginBtn">Sign In</button>
+            <div id="errorMessage">Invalid Credentials</div>
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="password" placeholder="Password">
+            <button id="loginBtn" class="btn-blue">Sign In</button>
         </div>
 
-        <div id="dashboardSection" class="login-card hidden">
-            <h3>Siren Control</h3>
-            <button id="sirenBtn" style="height:150px; width:150px; border-radius:50%; background:red; font-size:20px;">RING SIREN</button>
+        <div id="dashboardSection" class="hidden w-full max-w-lg">
+            <div class="card">
+                <p style="text-transform:uppercase; font-size:11px; font-weight:bold; color:#64748b; margin-bottom:15px;">Manual Override</p>
+                <button id="sirenBtn" class="btn-red">PUSH TO<br>RING</button>
+            </div>
+
+            <div class="card" style="text-align: left;">
+                <h3 style="margin-top:0;">System Settings</h3>
+                <label style="font-size:12px; font-weight:bold; color:#64748b;">CURRENT OPERATING MODE</label>
+                <select id="modeSelect">
+                    <option value="regular">Regular Class Mode</option>
+                    <option value="exam">Examination Mode</option>
+                    <option value="special">Special Event Mode</option>
+                </select>
+                <button id="saveModeBtn" class="btn-blue" style="background:#059669;">Update System Mode</button>
+            </div>
+            
+            <p style="text-align:center; color:#94a3b8; font-size:12px;">ESP32 Connection: <span style="color:#22c55e;">● Active</span></p>
         </div>
     </div>
 
@@ -101,6 +80,7 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
+        // Login Logic
         document.getElementById('loginBtn').onclick = () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
@@ -108,18 +88,38 @@
                 .then(() => {
                     document.getElementById('loginSection').classList.add('hidden');
                     document.getElementById('dashboardSection').classList.remove('hidden');
+                    loadCurrentMode();
                 })
-                .catch(err => alert(err.message));
+                .catch(err => {
+                    document.getElementById('errorMessage').style.display = 'block';
+                });
         };
 
-        document.getElementById('sirenBtn').onclick = () => {
-            db.ref('siren_system/manual_trigger').set({
-                status: true,
-                timestamp: Date.now()
-            }).then(() => {
-                alert("Signal Sent!");
-                setTimeout(() => db.ref('siren_system/manual_trigger/status').set(false), 2000);
+        // Load mode from Firebase
+        function loadCurrentMode() {
+            db.ref('siren_system/current_mode').on('value', (snapshot) => {
+                if(snapshot.exists()) {
+                    document.getElementById('modeSelect').value = snapshot.val();
+                }
             });
+        }
+
+        // Update Mode
+        document.getElementById('saveModeBtn').onclick = () => {
+            const newMode = document.getElementById('modeSelect').value;
+            db.ref('siren_system/current_mode').set(newMode)
+                .then(() => alert("System switched to " + newMode + " mode"));
+        };
+
+        // Manual Trigger
+        document.getElementById('sirenBtn').onclick = () => {
+            db.ref('siren_system/manual_trigger').set({ status: true, timestamp: Date.now() });
+            const btn = document.getElementById('sirenBtn');
+            btn.innerText = "RINGING...";
+            setTimeout(() => {
+                db.ref('siren_system/manual_trigger/status').set(false);
+                btn.innerHTML = "PUSH TO<br>RING";
+            }, 3000);
         };
     </script>
 </body>
