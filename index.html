@@ -106,6 +106,7 @@
         <div id="tab-account" class="tab-content hidden">
             <div class="card">
                 <h3>Account Security</h3>
+                <p id="accountMsg" style="font-size: 12px; margin-bottom: 10px; display: none; padding: 10px; border-radius: 6px;"></p>
                 <button class="btn" style="background:#f1f5f9; color:var(--primary)" onclick="resetPass()">CHANGE PASSWORD</button>
             </div>
         </div>
@@ -260,7 +261,27 @@ document.getElementById("email").addEventListener("keypress", function(event) {
         db.ref(`siren_system/schedules/${mode}`).set(data).then(() => alert("Settings Saved."));
     }
 
-    function resetPass() { auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Link sent.")); }
+    function resetPass() {
+    const msg = document.getElementById('accountMsg');
+    const userEmail = auth.currentUser.email;
+
+    auth.sendPasswordResetEmail(userEmail)
+    .then(() => {
+        msg.innerText = "Reset link sent to " + userEmail + ". Please check your inbox.";
+        msg.style.background = "#dcfce7"; // Success Green
+        msg.style.color = "#166534";
+        msg.style.display = "block";
+        
+        // Hide it after 5 seconds so the UI stays clean
+        setTimeout(() => { msg.style.display = "none"; }, 5000);
+    })
+    .catch((error) => {
+        msg.innerText = "Error: " + error.message;
+        msg.style.background = "#fee2e2"; // Error Red
+        msg.style.color = "#b91c1c";
+        msg.style.display = "block";
+    });
+}
     function forgotPass() { 
     const e = document.getElementById('email').value.trim(); 
     const err = document.getElementById('authError');
