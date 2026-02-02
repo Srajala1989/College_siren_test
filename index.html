@@ -7,8 +7,6 @@
     <style>
         :root { --primary: #0f172a; --accent: #2563eb; --bg: #f8fafc; --error: #ef4444; --success: #22c55e; }
         body { background-color: var(--bg); font-family: 'Inter', sans-serif; margin: 0; color: #334155; }
-        
-        /* Header & Logout */
         header { background: #fff; padding: 12px 20px; border-bottom: 2px solid #0056b3; display: flex; align-items: center; justify-content: space-between; }
         .brand { display: flex; align-items: center; gap: 12px; }
         .logo-box { width: 45px; height: 45px; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; background: #fff; }
@@ -16,37 +14,27 @@
         .header-text h1 { margin: 0; font-size: 13px; text-transform: uppercase; color: var(--primary); }
         .header-text p { margin: 0; font-size: 9px; font-weight: 800; color: #0056b3; }
         .logout-link { color: var(--error); font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid #fee2e2; padding: 5px 10px; border-radius: 6px; }
-
-        /* Forms & Inputs */
         .login-wrap { max-width: 360px; margin: 50px auto; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .input-group { position: relative; width: 100%; margin: 8px 0; }
         input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         .eye-icon { position: absolute; right: 12px; top: 12px; cursor: pointer; opacity: 0.6; z-index: 10; }
         .error-box { background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 15px; display: none; border: 1px solid #fecaca; }
-
-        /* Loader */
         .loader { border: 2px solid #f3f3f3; border-top: 2px solid white; border-radius: 50%; width: 14px; height: 14px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Dashboard & Tabs */
         .tab-bar { display: flex; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-size: 11px; font-weight: 800; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; text-transform: uppercase; }
         .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-
         .siren-btn { width: 120px; height: 120px; border-radius: 50%; border: 6px solid #f1f5f9; background: var(--success); color: white; font-weight: 800; margin: 15px auto; display: block; cursor: pointer; transition: 0.3s; }
         .siren-btn.ringing { background: var(--error); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-
         .mode-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
         .mode-card.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
         .mode-card.active::after { content: '✓'; background: var(--accent); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-
         .alarm-row { background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .full { grid-column: 1 / -1; }
         .hidden { display: none !important; }
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; background: var(--accent); color: white; }
-        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -65,7 +53,7 @@
 <div id="loginPage" class="login-wrap">
     <div class="card">
         <h2 style="margin:0 0 15px 0; font-size: 18px;">Admin Login</h2>
-        <div id="authError" class="error-box">Invalid credentials. Please try again.</div>
+        <div id="authError" class="error-box">Invalid credentials. Check email/password.</div>
         <input type="email" id="email" placeholder="Email Address">
         <div class="input-group">
             <input type="password" id="password" placeholder="Password">
@@ -99,13 +87,13 @@
         <div id="tab-settings" class="tab-content hidden">
             <div class="card">
                 <label style="font-size:11px; font-weight:800;">Configuration Mode</label>
-                <select id="configMode" onchange="loadAlarmUI()">
+                <select id="configMode" onchange="syncCountWithDB()">
                     <option value="regular">Regular Mode</option>
                     <option value="exam">Exam Mode</option>
                     <option value="special">Special Mode</option>
                 </select>
                 <label style="font-size:11px; font-weight:800;">Total Alarms</label>
-                <input type="number" id="alarmCount" value="1" min="1" max="20" onchange="loadAlarmUI()">
+                <input type="number" id="alarmCount" value="0" min="0" max="25" oninput="loadAlarmUI()">
                 <div id="alarmList"></div>
                 <button class="btn" style="margin-top:10px" onclick="saveSchedules()">SAVE SETTINGS</button>
             </div>
@@ -140,38 +128,25 @@
         const e = document.getElementById('email').value, p = document.getElementById('password').value;
         const btn = document.getElementById('loginBtn'), err = document.getElementById('authError');
         const rem = document.getElementById('remember').checked;
-        
         if(!e || !p) return;
         err.style.display = "none"; btn.disabled = true;
         btn.innerHTML = `<span class="loader"></span> SIGNING IN...`;
-
         auth.setPersistence(rem ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
         .then(() => auth.signInWithEmailAndPassword(e, p))
-        .catch(() => { 
-            resetLoginButton();
-            err.style.display = "block"; 
-        });
+        .catch(() => { resetLoginButton(); err.style.display = "block"; });
     }
 
-    // NEW: Function to reset button state
     function resetLoginButton() {
         const btn = document.getElementById('loginBtn');
-        btn.disabled = false;
-        btn.innerText = "SIGN IN";
+        btn.disabled = false; btn.innerText = "SIGN IN";
     }
 
     auth.onAuthStateChanged(user => {
         document.getElementById('loginPage').classList.toggle('hidden', user);
         document.getElementById('appPage').classList.toggle('hidden', !user);
         document.getElementById('logoutSection').classList.toggle('hidden', !user);
-        
-        if(user) {
-            syncDashboard();
-        } else {
-            // Reset UI for next login session
-            resetLoginButton();
-            document.getElementById('password').value = "";
-        }
+        if(!user) { resetLoginButton(); document.getElementById('password').value = ""; }
+        else { syncDashboard(); }
     });
 
     function togglePass(id) { const x = document.getElementById(id); x.type = x.type === "password" ? "text" : "password"; }
@@ -180,7 +155,7 @@
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
         document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.remove('hidden'); b.classList.add('active');
-        if(id === 'tab-settings') loadAlarmUI();
+        if(id === 'tab-settings') syncCountWithDB();
     }
 
     function syncDashboard() {
@@ -201,30 +176,35 @@
     function toggleSiren() { const ref = db.ref('siren_system/manual_trigger/status'); ref.once('value', s => ref.set(!s.val())); }
     function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
 
+    function syncCountWithDB() {
+        const mode = document.getElementById('configMode').value;
+        db.ref(`siren_system/schedules/${mode}`).once('value', snap => {
+            const data = snap.val() || [];
+            document.getElementById('alarmCount').value = data.length;
+            loadAlarmUI(); 
+        });
+    }
+
     function loadAlarmUI() {
         const mode = document.getElementById('configMode').value;
+        const count = parseInt(document.getElementById('alarmCount').value) || 0;
         const list = document.getElementById('alarmList');
         
         db.ref(`siren_system/schedules/${mode}`).once('value', snap => {
             const savedData = snap.val() || [];
-            const countInput = document.getElementById('alarmCount');
-            
-            // If we just loaded the mode, match the UI count to the database length
-            // If the user is manually changing the number, use the user's number
-            let count = savedData.length > 0 ? savedData.length : 1;
-            if (event && event.target && event.target.id === "alarmCount") {
-                count = parseInt(countInput.value);
-            } else {
-                countInput.value = count;
-            }
-            
             list.innerHTML = "";
+            
             for(let i=0; i<count; i++) {
                 const row = document.createElement('div'); row.className = 'alarm-row';
-                const dateH = mode === 'special' ? `<div class="full"><label>Date</label><input type="date" class="a-date" value="${savedData[i]?.date || ''}"></div>` : ``;
-                row.innerHTML = `${dateH}<div><label>Time</label><input type="time" class="a-time" value="${savedData[i]?.time || ''}"></div>
-                    <div><label>Length</label><select class="a-dur"><option value="3" ${savedData[i]?.duration==3?'selected':''}>Short</option>
-                    <option value="6" ${savedData[i]?.duration==6?'selected':''}>Medium</option><option value="12" ${savedData[i]?.duration==12?'selected':''}>Long</option></select></div>`;
+                const dateVal = savedData[i]?.date || '';
+                const timeVal = savedData[i]?.time || '';
+                const durVal = savedData[i]?.duration || '6';
+                
+                const dateH = mode === 'special' ? `<div class="full"><label>Date</label><input type="date" class="a-date" value="${dateVal}"></div>` : ``;
+                // Logic: input type="time" triggers the clock picker automatically
+                row.innerHTML = `${dateH}<div><label>Alarm Time</label><input type="time" class="a-time" value="${timeVal}"></div>
+                    <div><label>Length</label><select class="a-dur"><option value="3" ${durVal==3?'selected':''}>Short</option>
+                    <option value="6" ${durVal==6?'selected':''}>Medium</option><option value="12" ${durVal==12?'selected':''}>Long</option></select></div>`;
                 list.appendChild(row);
             }
         });
@@ -232,11 +212,12 @@
 
     function saveSchedules() {
         const mode = document.getElementById('configMode').value, rows = document.querySelectorAll('.alarm-row');
-        let data = []; rows.forEach(r => { 
+        let data = []; 
+        rows.forEach(r => { 
             const t = r.querySelector('.a-time').value;
-            if(t) { data.push({ time: t, duration: r.querySelector('.a-dur').value, date: r.querySelector('.a-date')?.value || null }); }
+            data.push({ time: t, duration: r.querySelector('.a-dur').value, date: r.querySelector('.a-date')?.value || null }); 
         });
-        db.ref(`siren_system/schedules/${mode}`).set(data).then(() => alert("Settings Saved for " + mode.toUpperCase()));
+        db.ref(`siren_system/schedules/${mode}`).set(data).then(() => alert("Settings Saved."));
     }
 
     function resetPass() { auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Link sent.")); }
