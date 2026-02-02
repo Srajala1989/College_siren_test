@@ -143,7 +143,10 @@
         btn.innerHTML = `<span class="loader"></span> SIGNING IN...`;
         auth.setPersistence(rem ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
         .then(() => auth.signInWithEmailAndPassword(e, p))
-        .catch(() => { resetLoginButton(); err.style.background = "#fee2e2"; });
+        .catch(() => { resetLoginButton(); err.innerText = "Invalid credentials. Check email/password.";
+        err.style.background = "#fee2e2"; // Ensure it's red
+        err.style.color = "#b91c1c";
+        err.style.display = "block"; // MAKE IT VISIBLE });
     }
 
     // Trigger login when "Enter" is pressed in the password field
