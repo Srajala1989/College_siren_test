@@ -151,7 +151,9 @@
         document.getElementById('appPage').classList.toggle('hidden', !user);
         document.getElementById('logoutSection').classList.toggle('hidden', !user);
         if(!user) { resetLoginButton(); document.getElementById('password').value = ""; }
-        else { syncDashboard(); }
+        else { 
+            switchTab('tab-dash', document.getElementById('btn-tab-dash'));
+            syncDashboard(); }
     });
 
     function togglePass(id) { const x = document.getElementById(id); x.type = x.type === "password" ? "text" : "password"; }
