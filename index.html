@@ -159,20 +159,40 @@
     }
 
     function syncDashboard() {
-        db.ref('siren_system/active_mode').on('value', snap => {
-            const m = snap.val() || 'regular';
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            document.getElementById('m_' + m)?.classList.add('active');
-            document.getElementById('configMode').value = m;
-        });
-        db.ref('siren_system/manual_trigger/status').on('value', snap => {
-            const isOn = snap.val();
-            const b = document.getElementById('sirenBtn'), t = document.getElementById('sirenStatus');
-            b.className = isOn ? 'siren-btn ringing' : 'siren-btn';
-            b.innerText = isOn ? 'TURN OFF' : 'TURN ON'; t.innerText = isOn ? "SIREN RINGING" : "SYSTEM READY";
-        });
-    }
+    // 1. Fetch Active Mode and Update Select Dropdown
+    db.ref('siren_system/active_mode').on('value', snap => {
+        const m = snap.val() || 'regular';
+        document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+        document.getElementById('m_' + m)?.classList.add('active');
+        // This line ensures the settings dropdown matches the database
+        document.getElementById('configMode').value = m;
+    });
 
+    // 2. Fetch Manual Status and Update Button Labels
+    db.ref('siren_system/manual_trigger/status').on('value', snap => {
+        const isOn = snap.val();
+        const b = document.getElementById('sirenBtn'), t = document.getElementById('sirenStatus');
+        const lbl = document.getElementById('triggerStatus'), txt = document.getElementById('sirenTxt');
+        
+        b.className = isOn ? 'siren-btn ringing' : 'siren-btn';
+        txt.innerText = isOn ? 'TURN OFF' : 'TURN ON';
+        lbl.innerText = isOn ? '[ON]' : '[OFF]';
+        t.innerText = isOn ? "SIREN RINGING" : "SYSTEM READY";
+    });
+}
+
+    // 2. Fetch Manual Status and Update Button Labels
+    db.ref('siren_system/manual_trigger/status').on('value', snap => {
+        const isOn = snap.val();
+        const b = document.getElementById('sirenBtn'), t = document.getElementById('sirenStatus');
+        const lbl = document.getElementById('triggerStatus'), txt = document.getElementById('sirenTxt');
+        
+        b.className = isOn ? 'siren-btn ringing' : 'siren-btn';
+        txt.innerText = isOn ? 'TURN OFF' : 'TURN ON';
+        lbl.innerText = isOn ? '[ON]' : '[OFF]';
+        t.innerText = isOn ? "SIREN RINGING" : "SYSTEM READY";
+    });
+}
     function toggleSiren() { const ref = db.ref('siren_system/manual_trigger/status'); ref.once('value', s => ref.set(!s.val())); }
     function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
 
@@ -186,29 +206,30 @@
     }
 
     function loadAlarmUI() {
-        const mode = document.getElementById('configMode').value;
-        const count = parseInt(document.getElementById('alarmCount').value) || 0;
-        const list = document.getElementById('alarmList');
+    const mode = document.getElementById('configMode').value;
+    const count = parseInt(document.getElementById('alarmCount').value) || 0;
+    const list = document.getElementById('alarmList');
+    
+    db.ref(`siren_system/schedules/${mode}`).once('value', snap => {
+        const savedData = snap.val() || [];
+        list.innerHTML = "";
         
-        db.ref(`siren_system/schedules/${mode}`).once('value', snap => {
-            const savedData = snap.val() || [];
-            list.innerHTML = "";
+        for(let i=0; i<count; i++) {
+            const row = document.createElement('div'); row.className = 'alarm-row';
+            const dateVal = savedData[i]?.date || '';
+            const timeVal = savedData[i]?.time || '';
+            const durVal = savedData[i]?.duration || '6';
             
-            for(let i=0; i<count; i++) {
-                const row = document.createElement('div'); row.className = 'alarm-row';
-                const dateVal = savedData[i]?.date || '';
-                const timeVal = savedData[i]?.time || '';
-                const durVal = savedData[i]?.duration || '6';
-                
-                const dateH = mode === 'special' ? `<div class="full"><label>Date</label><input type="date" class="a-date" value="${dateVal}"></div>` : ``;
-                // Logic: input type="time" triggers the clock picker automatically
-                row.innerHTML = `${dateH}<div><label>Alarm Time</label><input type="time" class="a-time" value="${timeVal}"></div>
-                    <div><label>Length</label><select class="a-dur"><option value="3" ${durVal==3?'selected':''}>Short</option>
-                    <option value="6" ${durVal==6?'selected':''}>Medium</option><option value="12" ${durVal==12?'selected':''}>Long</option></select></div>`;
-                list.appendChild(row);
-            }
-        });
-    }
+            // Fixed: "Special" mode now correctly triggers date field immediately
+            const dateH = mode === 'special' ? `<div class="full"><label>Event Date</label><input type="date" class="a-date" value="${dateVal}"></div>` : ``;
+            
+            row.innerHTML = `${dateH}<div><label>Time</label><input type="time" class="a-time" value="${timeVal}"></div>
+                <div><label>Length</label><select class="a-dur"><option value="3" ${durVal==3?'selected':''}>Short</option>
+                <option value="6" ${durVal==6?'selected':''}>Medium</option><option value="12" ${durVal==12?'selected':''}>Long</option></select></div>`;
+            list.appendChild(row);
+        }
+    });
+}
 
     function saveSchedules() {
         const mode = document.getElementById('configMode').value, rows = document.querySelectorAll('.alarm-row');
