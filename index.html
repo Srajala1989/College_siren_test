@@ -151,27 +151,63 @@
     });
 
     function syncDash() {
-        db.ref('siren_system/active_mode').on('value', snap => {
-            const m = snap.val() || 'regular';
-            document.querySelectorAll('#tab-dash .mode-card').forEach(c => c.classList.remove('active'));
-            document.getElementById('m_' + m)?.classList.add('active');
-            document.getElementById('examSessions').classList.toggle('hidden', m !== 'exam');
-        });
+    // 1. Sync Main Mode (Regular vs Exam)
+    db.ref('siren_system/active_mode').on('value', snap => {
+        const m = snap.val() || 'regular';
+        
+        // Remove active class from all mode cards
+        document.getElementById('m_regular').classList.remove('active');
+        document.getElementById('m_exam').classList.remove('active');
+        
+        // Highlight the current active mode
+        const activeCard = document.getElementById('m_' + m);
+        if (activeCard) activeCard.classList.add('active');
+        
+        // Toggle the visibility of the Exam Session selection area
+        const examArea = document.getElementById('examSessions');
+        if (m === 'exam') {
+            examArea.classList.remove('hidden');
+        } else {
+            examArea.classList.add('hidden');
+        }
+    });
 
-        db.ref('siren_system/active_session').on('value', snap => {
-            const s = snap.val() || 'morning';
-            ['morning', 'afternoon', 'full'].forEach(id => document.getElementById('s_' + id)?.classList.remove('active'));
-            document.getElementById('s_' + s)?.classList.add('active');
+    // 2. Sync Active Session (Morning, Afternoon, Full)
+    db.ref('siren_system/active_session').on('value', snap => {
+        const s = snap.val() || 'morning';
+        
+        // Select all possible session cards and clear the active class
+        const sessionIds = ['s_morning', 's_afternoon', 's_full'];
+        sessionIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('active');
         });
+        
+        // Apply the active class to the session currently stored in Firebase
+        const activeSessionCard = document.getElementById('s_' + s);
+        if (activeSessionCard) {
+            activeSessionCard.classList.add('active');
+        }
+    });
 
-        db.ref('siren_system/manual_trigger/status').on('value', snap => {
-            const isOn = snap.val();
-            const b = document.getElementById('sirenBtn'), txt = document.getElementById('sirenTxt'), lbl = document.getElementById('triggerStatus');
-            b.className = isOn ? 'siren-btn ringing' : 'siren-btn';
-            txt.innerText = isOn ? 'TURN OFF' : 'TURN ON';
-            lbl.innerText = isOn ? '[ON]' : '[OFF]';
-        });
-    }
+    // 3. Sync Manual Siren Button State
+    db.ref('siren_system/manual_trigger/status').on('value', snap => {
+        const isOn = snap.val();
+        const btn = document.getElementById('sirenBtn');
+        const txt = document.getElementById('sirenTxt');
+        const lbl = document.getElementById('triggerStatus');
+        
+        if (isOn) {
+            btn.className = 'siren-btn ringing';
+            txt.innerText = 'TURN OFF';
+            lbl.innerText = '[ON]';
+        } else {
+            btn.className = 'siren-btn';
+            txt.innerText = 'TURN ON';
+            lbl.innerText = '[OFF]';
+        }
+    });
+}
 
     function updateMode(m) { 
         db.ref('siren_system/active_mode').set(m); 
