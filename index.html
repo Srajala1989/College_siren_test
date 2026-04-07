@@ -30,7 +30,6 @@
         .siren-btn.ringing { background: var(--error); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         .mode-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 15px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; transition: 0.2s; }
-        .mode-card:hover { border-color: #cbd5e1; }
         .mode-card.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
         .mode-card.active::after { content: '✓'; background: var(--accent); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
         .section-label { font-size: 10px; font-weight: 800; color: #94a3b8; margin: 15px 0 8px 0; text-transform: uppercase; text-align: left; letter-spacing: 0.5px; }
@@ -38,7 +37,6 @@
         .full { grid-column: 1 / -1; }
         .hidden { display: none !important; }
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; background: var(--accent); color: white; margin-top: 10px; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -65,7 +63,7 @@
         </div>
         <div style="font-size:12px; margin-bottom:15px; display:flex; justify-content:space-between; align-items: center;">
             <label style="margin:0; display:flex; align-items:center; gap:5px; color:#334155; text-transform:none;"><input type="checkbox" id="remember" style="width:auto; margin:0;"> Remember me</label>
-            <span onclick="forgotPass()" style="color:var(--accent); cursor:pointer; font-weight:700">Forgot Password?</span>
+            <span onclick="forgotPass()" style="color:var(--accent); cursor:pointer; font-weight:700">Forgot?</span>
         </div>
         <button id="loginBtn" class="btn" onclick="handleLogin()">SIGN IN</button>
     </div>
@@ -81,7 +79,7 @@
         
         <div id="tab-dash" class="tab-content">
             <div class="card" style="text-align:center">
-                <div class="section-label">Manual Override</div>
+                <div class="section-label">Manual Control</div>
                 <button id="sirenBtn" class="siren-btn" onclick="toggleSiren()">
                     <div id="sirenTxt">TURN ON</div>
                     <span id="triggerStatus" style="position: absolute; bottom: 20px; left: 0; right: 0; font-size: 10px; opacity: 0.8;">[OFF]</span>
@@ -90,45 +88,44 @@
                 
                 <hr style="margin:20px 0; border:0; border-top:1px solid #f1f5f9">
                 
-                <div class="section-label">Regular Mode</div>
-                <div class="mode-card" id="m_regular" onclick="updateActiveMode('regular')">Regular Session</div>
-                
-                <div class="section-label">Examination Modes</div>
-                <div class="mode-card" id="m_exam_morning" onclick="updateActiveMode('exam_morning')">Exam: Morning Session</div>
-                <div class="mode-card" id="m_exam_afternoon" onclick="updateActiveMode('exam_afternoon')">Exam: Afternoon Session</div>
-                <div class="mode-card" id="m_exam_full" onclick="updateActiveMode('exam_full')">Exam: Full Day Session</div>
+                <div class="section-label">Daily Mode Selection</div>
+                <div class="mode-card" id="m_regular" onclick="updateActiveMode('regular')">Regular (Full Day)</div>
+                <div class="mode-card" id="m_regular_half" onclick="updateActiveMode('regular_half')">Regular (Half Day)</div>
+                <div class="mode-card" id="m_exam_morning" onclick="updateActiveMode('exam_morning')">Exam (Morning)</div>
+                <div class="mode-card" id="m_exam_afternoon" onclick="updateActiveMode('exam_afternoon')">Exam (Afternoon)</div>
+                <div class="mode-card" id="m_exam_full" onclick="updateActiveMode('exam_full')">Exam (Full Day)</div>
             </div>
         </div>
 
         <div id="tab-settings" class="tab-content hidden">
             <div class="card">
-                <label>Configuration Type</label>
+                <label>Main Mode</label>
                 <select id="configMode" onchange="updateSubModeUI()">
                     <option value="regular">Regular Mode</option>
                     <option value="exam">Examination Mode</option>
-                    <option value="special">Special Event (Date Based)</option>
+                    <option value="special">Special Event</option>
                 </select>
 
-                <label>Specific Session</label>
+                <label>Sub-Session</label>
                 <select id="configSubMode" onchange="syncCountWithDB()">
                     </select>
 
                 <hr style="margin:20px 0; border:0; border-top:1px solid #f1f5f9">
 
-                <label>Total Alarms for Session</label>
+                <label>Number of Alarms</label>
                 <input type="number" id="alarmCount" value="0" min="0" max="25" oninput="loadAlarmUI()">
                 
                 <div id="alarmList" style="margin-top:15px;"></div>
                 
-                <button id="saveBtn" class="btn" onclick="saveSchedules()">SAVE CONFIGURATION</button>
+                <button id="saveBtn" class="btn" onclick="saveSchedules()">SAVE SETTINGS</button>
             </div>
         </div>
 
         <div id="tab-account" class="tab-content hidden">
             <div class="card">
-                <h3>Account Security</h3>
+                <h3>Security</h3>
                 <p id="accountMsg" style="font-size: 12px; margin-bottom: 10px; display: none; padding: 10px; border-radius: 6px;"></p>
-                <button class="btn" style="background:#f1f5f9; color:var(--primary)" onclick="resetPass()">SEND PASSWORD RESET EMAIL</button>
+                <button class="btn" style="background:#f1f5f9; color:var(--primary)" onclick="resetPass()">SEND RESET EMAIL</button>
             </div>
         </div>
     </div>
@@ -151,15 +148,15 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // --- AUTH ---
+    // AUTH
     function handleLogin() {
         const e = document.getElementById('email').value, p = document.getElementById('password').value;
         const btn = document.getElementById('loginBtn'), err = document.getElementById('authError');
-        if(!e || !p) { err.innerText = "Please enter both email and password."; err.style.display = "block"; return; }
-        btn.disabled = true; btn.innerHTML = `<span class="loader"></span> SIGNING IN...`;
-        auth.signInWithEmailAndPassword(e, p).catch(err_msg => { 
+        if(!e || !p) { err.innerText = "Check credentials."; err.style.display = "block"; return; }
+        btn.disabled = true; btn.innerHTML = `<span class="loader"></span>...`;
+        auth.signInWithEmailAndPassword(e, p).catch(x => { 
             btn.disabled = false; btn.innerText = "SIGN IN";
-            err.innerText = err_msg.message; err.style.display = "block"; 
+            err.innerText = x.message; err.style.display = "block"; 
         });
     }
 
@@ -170,7 +167,7 @@
         if(user) { syncDashboard(); updateSubModeUI(); }
     });
 
-    // --- NAVIGATION ---
+    // NAVIGATION
     function switchTab(id, b) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
         document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
@@ -178,7 +175,7 @@
         if(id === 'tab-settings') updateSubModeUI();
     }
 
-    // --- DASHBOARD ---
+    // DASHBOARD
     function syncDashboard() {
         db.ref('siren_system/active_mode').on('value', snap => {
             const m = snap.val() || 'regular';
@@ -188,55 +185,42 @@
 
         db.ref('siren_system/manual_trigger/status').on('value', snap => {
             const isOn = snap.val();
-            const b = document.getElementById('sirenBtn'), t = document.getElementById('sirenStatus');
-            const lbl = document.getElementById('triggerStatus'), txt = document.getElementById('sirenTxt');
+            const b = document.getElementById('sirenBtn'), txt = document.getElementById('sirenTxt'), lbl = document.getElementById('triggerStatus');
             b.className = isOn ? 'siren-btn ringing' : 'siren-btn';
             txt.innerText = isOn ? 'TURN OFF' : 'TURN ON';
             lbl.innerText = isOn ? '[ON]' : '[OFF]';
-            t.innerText = isOn ? "SIREN RINGING" : "SYSTEM READY";
         });
     }
 
-    function toggleSiren() { 
-        const ref = db.ref('siren_system/manual_trigger/status'); 
-        ref.once('value', s => ref.set(!s.val())); 
-    }
+    function toggleSiren() { const ref = db.ref('siren_system/manual_trigger/status'); ref.once('value', s => ref.set(!s.val())); }
+    function updateActiveMode(m) { db.ref('siren_system/active_mode').set(m); }
 
-    function updateActiveMode(m) { 
-        db.ref('siren_system/active_mode').set(m); 
-    }
-
-    // --- SETTINGS ---
+    // SETTINGS
     function updateSubModeUI() {
         const main = document.getElementById('configMode').value;
         const subSelect = document.getElementById('configSubMode');
         subSelect.innerHTML = "";
-
         let options = [];
+
         if(main === 'regular') {
-            options = [{v: 'full', t: 'Full Day Schedule'}, {v: 'half', t: 'Half Day Schedule'}];
+            options = [{v: 'full', t: 'Regular Full Day'}, {v: 'half', t: 'Regular Half Day'}];
         } else if(main === 'exam') {
-            options = [
-                {v: 'morning', t: 'Morning Session'}, 
-                {v: 'afternoon', t: 'Afternoon Session'},
-                {v: 'full', t: 'Full Day Session'}
-            ];
+            options = [{v: 'morning', t: 'Exam Morning Session'}, {v: 'afternoon', t: 'Exam Afternoon Session'}];
         } else {
-            options = [{v: 'default', t: 'Special Event Config'}];
+            options = [{v: 'default', t: 'Special Event'}];
         }
 
-        options.forEach(opt => {
+        options.forEach(o => {
             const el = document.createElement('option');
-            el.value = opt.v; el.innerText = opt.t;
+            el.value = o.v; el.innerText = o.t;
             subSelect.appendChild(el);
         });
         syncCountWithDB();
     }
 
     function syncCountWithDB() {
-        const mode = document.getElementById('configMode').value;
-        const sub = document.getElementById('configSubMode').value;
-        db.ref(`siren_system/schedules/${mode}/${sub}`).once('value', snap => {
+        const m = document.getElementById('configMode').value, s = document.getElementById('configSubMode').value;
+        db.ref(`siren_system/schedules/${m}/${s}`).once('value', snap => {
             const data = snap.val() || [];
             document.getElementById('alarmCount').value = data.length;
             loadAlarmUI(); 
@@ -244,60 +228,37 @@
     }
 
     function loadAlarmUI() {
-        const mode = document.getElementById('configMode').value;
-        const sub = document.getElementById('configSubMode').value;
-        const count = Math.min(parseInt(document.getElementById('alarmCount').value) || 0, 25);
+        const m = document.getElementById('configMode').value, s = document.getElementById('configSubMode').value;
+        const count = parseInt(document.getElementById('alarmCount').value) || 0;
         const list = document.getElementById('alarmList');
-        
-        db.ref(`siren_system/schedules/${mode}/${sub}`).once('value', snap => {
-            const savedData = snap.val() || [];
+        db.ref(`siren_system/schedules/${m}/${s}`).once('value', snap => {
+            const saved = snap.val() || [];
             list.innerHTML = "";
             for(let i=0; i<count; i++) {
                 const row = document.createElement('div'); row.className = 'alarm-row';
-                const timeVal = savedData[i]?.time || '';
-                const durVal = savedData[i]?.duration || '6';
-                const dateVal = savedData[i]?.date || '';
-                let dateHtml = mode === 'special' ? `<div class="full"><label>Event Date</label><input type="date" class="a-date" value="${dateVal}"></div>` : '';
-                row.innerHTML = `${dateHtml}
-                    <div><label>Time</label><input type="time" class="a-time" value="${timeVal}"></div>
-                    <div><label>Length</label><select class="a-dur">
-                        <option value="3" ${durVal==3?'selected':''}>Short (3s)</option>
-                        <option value="6" ${durVal==6?'selected':''}>Medium (6s)</option>
-                        <option value="12" ${durVal==12?'selected':''}>Long (12s)</option>
-                    </select></div>`;
+                const tVal = saved[i]?.time || '', dVal = saved[i]?.duration || '6', dtVal = saved[i]?.date || '';
+                let dtHtml = m === 'special' ? `<div class="full"><label>Date</label><input type="date" class="a-date" value="${dtVal}"></div>` : '';
+                row.innerHTML = `${dtHtml}<div><label>Time</label><input type="time" class="a-time" value="${tVal}"></div>
+                                 <div><label>Duration</label><select class="a-dur"><option value="3" ${dVal==3?'selected':''}>3s</option><option value="6" ${dVal==6?'selected':''}>6s</option><option value="12" ${dVal==12?'selected':''}>12s</option></select></div>`;
                 list.appendChild(row);
             }
         });
     }
 
     function saveSchedules() {
-        const btn = document.getElementById('saveBtn');
-        const mode = document.getElementById('configMode').value;
-        const sub = document.getElementById('configSubMode').value;
-        const rows = document.querySelectorAll('.alarm-row');
-        let data = []; 
-        rows.forEach(r => { 
-            data.push({ 
-                time: r.querySelector('.a-time').value, 
-                duration: r.querySelector('.a-dur').value, 
-                date: r.querySelector('.a-date')?.value || null 
-            }); 
-        });
-        btn.disabled = true; btn.innerText = "SAVING...";
-        db.ref(`siren_system/schedules/${mode}/${sub}`).set(data).then(() => {
-            alert("Settings saved successfully.");
-            btn.disabled = false; btn.innerText = "SAVE CONFIGURATION";
-        });
+        const m = document.getElementById('configMode').value, s = document.getElementById('configSubMode').value;
+        const data = Array.from(document.querySelectorAll('.alarm-row')).map(r => ({
+            time: r.querySelector('.a-time').value,
+            duration: r.querySelector('.a-dur').value,
+            date: r.querySelector('.a-date')?.value || null
+        }));
+        db.ref(`siren_system/schedules/${m}/${s}`).set(data).then(() => alert("Saved!"));
     }
 
-    // --- MISC ---
+    // MISC
     function togglePass(id) { const x = document.getElementById(id); x.type = x.type === "password" ? "text" : "password"; }
-    function resetPass() { auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Reset email sent.")); }
-    function forgotPass() {
-        const e = document.getElementById('email').value;
-        if(!e) alert("Please enter your email address first.");
-        else auth.sendPasswordResetEmail(e).then(() => alert("Reset email sent. Check your inbox."));
-    }
+    function resetPass() { auth.sendPasswordResetEmail(auth.currentUser.email).then(() => alert("Sent!")); }
+    function forgotPass() { const e = document.getElementById('email').value; if(e) auth.sendPasswordResetEmail(e).then(() => alert("Check email!")); }
 </script>
 </body>
 </html>
