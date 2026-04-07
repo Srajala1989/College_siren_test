@@ -186,7 +186,7 @@
         });
     }
 
-    function updateMode(m) { db.ref('siren_system/active_mode').set(m); }
+    function updateMode(m) { db.ref('siren_system/active_mode').set(m); if(m === 'exam') {db.ref('siren_system/active_session').set('full');}}
     function updateSession(s) { db.ref('siren_system/active_session').set(s); }
     function toggleSiren() { const r = db.ref('siren_system/manual_trigger/status'); r.once('value', s => r.set(!s.val())); }
 
